@@ -1,10 +1,19 @@
 import type { PropsWithChildren } from "react";
 
-export type BadgeProps = PropsWithChildren;
+export interface BadgeProps extends PropsWithChildren {
+  variant?: "primary" | "success" | "error" | "neutral";
+}
 
-export default function Badge({ children }: BadgeProps) {
+const variantStyles = {
+  primary: "bg-primary-container/20 text-on-primary-container",
+  success: "bg-primary-container/20 text-on-primary-container",
+  error:   "bg-error-container text-on-error-container",
+  neutral: "bg-surface-container-high text-on-surface-variant",
+};
+
+export default function Badge({ variant = "primary", children }: BadgeProps) {
   return (
-    <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-900">
+    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wide uppercase ${variantStyles[variant]}`}>
       {children}
     </span>
   );
