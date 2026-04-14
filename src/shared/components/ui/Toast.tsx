@@ -1,7 +1,18 @@
 export interface ToastProps {
-  message: string
+  message: string;
+  type?: "success" | "error" | "info";
 }
 
-export default function Toast({ message }: ToastProps) {
-  return <div className="rounded-md bg-stone-900 px-3 py-2 text-sm text-white">{message}</div>
+const typeStyles = {
+  success: "bg-primary text-on-primary",
+  error:   "bg-error text-on-error",
+  info:    "bg-inverse-surface text-inverse-on-surface",
+};
+
+export default function Toast({ message, type = "info" }: ToastProps) {
+  return (
+    <div className={`rounded-xl px-4 py-3 text-sm font-medium shadow-float ${typeStyles[type]}`}>
+      {message}
+    </div>
+  );
 }

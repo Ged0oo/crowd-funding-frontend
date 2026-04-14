@@ -1,42 +1,70 @@
-export default function HomePage() {
-  return (
-    <section className="space-y-6">
-      <div className="rounded-2xl border border-amber-900/15 bg-white p-6 shadow-sm">
-        <p className="inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-900">
-          Discovery
-        </p>
-        <h1 className="mt-3 text-3xl font-bold text-stone-900">
-          CrowdFund Egypt
-        </h1>
-        <p className="mt-2 max-w-2xl text-stone-600">
-          Launch meaningful projects and support creators across Egypt.
-        </p>
-      </div>
+import { useHomepage } from "../hooks/useHomepage";
+import HeroSlider from "../components/HeroSlider";
+import CategoryPills from "../components/CategoryPills";
+import ProjectGrid from "../components/ProjectGrid";
+import BentoGrid from "../components/BentoGrid";
+import Spinner from "../../../shared/components/ui/Spinner";
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <article className="rounded-xl border border-stone-200 bg-white p-4">
-          <h2 className="text-lg font-semibold text-stone-900">Top Rated</h2>
-          <p className="mt-1 text-sm text-stone-600">
-            Hero projects with best community ratings.
-          </p>
-        </article>
-        <article className="rounded-xl border border-stone-200 bg-white p-4">
-          <h2 className="text-lg font-semibold text-stone-900">
-            Latest Campaigns
-          </h2>
-          <p className="mt-1 text-sm text-stone-600">
-            Fresh projects that were recently launched.
-          </p>
-        </article>
-        <article className="rounded-xl border border-stone-200 bg-white p-4">
-          <h2 className="text-lg font-semibold text-stone-900">
-            Featured Picks
-          </h2>
-          <p className="mt-1 text-sm text-stone-600">
-            Editor-selected campaigns highlighted by admins.
-          </p>
-        </article>
+export default function HomePage() {
+  const { data, isLoading, isError } = useHomepage();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-32">
+        <Spinner size="lg" />
       </div>
-    </section>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex justify-center items-center py-32">
+        <p className="text-on-surface-variant">Could not load home page</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="-mx-6">
+      <HeroSlider projects={data.top5_rated} />
+
+      <CategoryPills categories={data.categories} />
+
+      {/* Featured campaigns */}
+      <section className="px-8 mb-20">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <span className="text-primary font-bold tracking-widest text-xs uppercase mb-2 block">
+              Curated Selection
+            </span>
+            <h2 className="text-4xl font-black font-headline text-on-surface">
+              Featured Campaigns
+            </h2>
+          </div>
+          <button className="text-primary font-bold flex items-center gap-2 group hover:underline underline-offset-4">
+            View all projects
+            <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
+              arrow_forward
+            </span>
+          </button>
+        </div>
+        <ProjectGrid projects={data.featured5} />
+      </section>
+
+      {/* Freshly launched*/}
+      <section className="px-8 mb-24 bg-surface-container-low py-20 -mx-8">
+        <div className="max-w-[1440px] mx-auto px-8">
+          <div className="mb-12">
+            <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">
+              New Arrivals
+            </span>
+            <h2 className="text-4xl font-black font-headline text-on-surface">
+              Freshly Launched
+            </h2>
+          </div>
+          <BentoGrid projects={data.latest5} />
+        </div>
+      </section>
+    </div>
   );
 }

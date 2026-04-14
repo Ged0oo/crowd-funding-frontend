@@ -17,7 +17,7 @@ export interface ProjectImage {
 export interface ProjectCard {
   id: number
   title: string
-  image: string
+  image: string | null
   funded_pct: number
   avg_rating: number
   category: string

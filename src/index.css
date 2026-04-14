@@ -2,40 +2,19 @@
 @config "../tailwind.config.ts";
 
 :root {
-  font-family: "Poppins", "Segoe UI", sans-serif;
-
-  /* Global palette override for existing amber/stone utility classes */
-  --color-amber-50: #eefbff;
-  --color-amber-100: #d9f4ff;
-  --color-amber-200: #b8e8ff;
-  --color-amber-700: #0e7490;
-  --color-amber-800: #155e75;
-  --color-amber-900: #164e63;
-
-  --color-stone-50: #f6fbfc;
-  --color-stone-100: #edf6f8;
-  --color-stone-200: #dbe9ed;
-  --color-stone-300: #c5d9de;
-  --color-stone-500: #5f7d86;
-  --color-stone-600: #48646d;
-  --color-stone-700: #395159;
-  --color-stone-800: #283c43;
-  --color-stone-900: #1b2f35;
+  font-family: "Inter", "Segoe UI", sans-serif;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(
-      circle at 15% 20%,
-      rgba(14, 116, 144, 0.18),
-      transparent 36%
-    ),
-    radial-gradient(
-      circle at 85% 10%,
-      rgba(34, 197, 94, 0.12),
-      transparent 35%
-    ),
-    #f4fbfd;
+  background-color: #f7f9fb;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
