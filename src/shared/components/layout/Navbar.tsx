@@ -95,7 +95,7 @@ export default function Navbar() {
                 Log In
               </NavLink>
               <NavLink
-                to="/register"
+                to="/authenticate"
                 className="rounded-xl bg-linear-to-br from-primary to-primary-container px-5 py-2.5 text-sm font-bold text-on-primary shadow-md active:scale-95 transition-all duration-200"
               >
                 Start Now
