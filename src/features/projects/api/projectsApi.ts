@@ -86,6 +86,6 @@ export const searchTags = async (query: string): Promise<TagAutoCompleteResponse
 };
 
 export const getCategories = async (): Promise<Category[]> => {
-    const { data } = await axios.get<Category[]>("/categories/");
+    const { data } = await axios.get<Category[]>("/projects/categories/");
     return data;
 };

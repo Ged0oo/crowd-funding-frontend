@@ -11,7 +11,7 @@ export default function Navbar() {
   const links = useMemo(
     () => [
       { to: "/", label: "Home" },
-      { to: "/categories/technology", label: "Categories" },
+      { to: "/categories", label: "Categories" },
       { to: "/projects/create", label: "Start Project" },
     ],
     [],

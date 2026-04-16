@@ -10,6 +10,11 @@ import Badge from "../../../shared/components/ui/Badge";
 import Spinner from "../../../shared/components/ui/Spinner";
 import PageWrapper from "../../../shared/components/layout/PageWrapper";
 
+const toNumber = (value: unknown): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
 const ProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const projectId = Number(id);
@@ -48,7 +53,75 @@ const ProjectDetailPage: React.FC = () => {
     );
   }
 
-  const isOwner = user?.id === project.creator.id;
+  const rawProject = project as unknown as {
+    id: number;
+    title?: string;
+    details?: string;
+    creator?: {
+      id?: number | string;
+      first_name?: string;
+      last_name?: string;
+      profile_picture?: string | null;
+    };
+    owner?: {
+      id?: number | string;
+      first_name?: string;
+      last_name?: string;
+      profile_picture?: string | null;
+    };
+    category?: { name?: string; slug?: string } | null;
+    tags?: Array<{ id: number; name: string }>;
+    images?: Array<{ id: number; image: string; created_at: string }>;
+    media?: Array<{ id: number; image: string; created_at: string }>;
+    current_amount?: number | string;
+    current_donations?: number | string;
+    total_target?: number | string;
+    funded_pct?: number | string;
+    funded_percentage?: number | string;
+    avg_rating?: number | string;
+    average_rating?: number | string;
+    rating_count?: number;
+    is_featured?: boolean;
+    is_cancelled?: boolean;
+    is_running?: boolean;
+    start_date?: string;
+    end_date?: string;
+    start_time?: string;
+    end_time?: string;
+    created_at?: string;
+  };
+
+  const creator = rawProject.creator ?? rawProject.owner;
+  const creatorFirstName = creator?.first_name ?? "Unknown";
+  const creatorLastName = creator?.last_name ?? "User";
+  const creatorInitials = `${creatorFirstName[0] ?? "U"}${creatorLastName[0] ?? "U"}`;
+
+  const images = rawProject.images ?? rawProject.media ?? [];
+  const tags = rawProject.tags ?? [];
+
+  const totalTarget = toNumber(rawProject.total_target);
+  const currentAmount =
+    toNumber(rawProject.current_donations) ||
+    toNumber(rawProject.current_amount);
+  const fundedPct =
+    rawProject.funded_pct !== undefined
+      ? toNumber(rawProject.funded_pct)
+      : rawProject.funded_percentage !== undefined
+        ? toNumber(rawProject.funded_percentage)
+        : totalTarget > 0
+          ? (currentAmount / totalTarget) * 100
+          : 0;
+
+  const startDate = rawProject.start_date ?? rawProject.start_time;
+  const endDate = rawProject.end_date ?? rawProject.end_time;
+  const isRunning = Boolean(rawProject.is_running);
+  const isCancelled = Boolean(rawProject.is_cancelled);
+
+  const projectIdValue = toNumber(rawProject.id);
+  const isOwner =
+    creator?.id !== undefined &&
+    user?.id !== undefined &&
+    String(user.id) === String(creator.id);
 
   return (
     <PageWrapper>
@@ -58,51 +131,49 @@ const ProjectDetailPage: React.FC = () => {
         {/* ════════════════════════════════════════ */}
         <div className="lg:col-span-2 space-y-8">
           {/* Image slider */}
-          <ImageSlider images={project.images} />
+          <ImageSlider images={images} />
 
           {/* Title + status badges */}
           <div>
             <div className="mb-3 flex flex-wrap items-center gap-2">
               {project.category && (
-                <Link to={`/categories/${project.category.slug}`}>
-                  <Badge>{project.category.name}</Badge>
+                <Link to={`/categories/${rawProject.category?.slug}`}>
+                  <Badge>{rawProject.category?.name}</Badge>
                 </Link>
               )}
-              {project.is_featured && <Badge>⭐ Featured</Badge>}
-              {project.is_cancelled && <Badge>Cancelled</Badge>}
-              {!project.is_cancelled && project.is_running && (
-                <Badge>Running</Badge>
-              )}
-              {!project.is_cancelled && !project.is_running && (
-                <Badge>Ended</Badge>
-              )}
+              {rawProject.is_featured && <Badge>⭐ Featured</Badge>}
+              {isCancelled && <Badge>Cancelled</Badge>}
+              {!isCancelled && isRunning && <Badge>Running</Badge>}
+              {!isCancelled && !isRunning && <Badge>Ended</Badge>}
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900">
-              {project.title}
+              {rawProject.title ?? "Untitled Project"}
             </h1>
           </div>
 
           {/* Creator info */}
           <div className="flex items-center gap-3">
-            {project.creator.profile_picture ? (
+            {creator?.profile_picture ? (
               <img
-                src={project.creator.profile_picture}
-                alt={project.creator.first_name}
+                src={creator.profile_picture}
+                alt={creatorFirstName}
                 className="h-10 w-10 rounded-full object-cover"
               />
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
-                {project.creator.first_name[0]}
-                {project.creator.last_name[0]}
+                {creatorInitials}
               </div>
             )}
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {project.creator.first_name} {project.creator.last_name}
+                {creatorFirstName} {creatorLastName}
               </p>
               <p className="text-xs text-gray-500">
-                Created {new Date(project.created_at).toLocaleDateString()}
+                Created{" "}
+                {rawProject.created_at
+                  ? new Date(rawProject.created_at).toLocaleDateString()
+                  : "-"}
               </p>
             </div>
           </div>
@@ -113,16 +184,16 @@ const ProjectDetailPage: React.FC = () => {
               About This Project
             </h2>
             <div className="prose max-w-none text-gray-700 whitespace-pre-wrap">
-              {project.details}
+              {rawProject.details ?? "No details provided."}
             </div>
           </div>
 
           {/* Tags */}
-          {project.tags.length > 0 && (
+          {tags.length > 0 && (
             <div>
               <h3 className="mb-2 text-sm font-medium text-gray-500">Tags</h3>
               <div className="flex flex-wrap gap-2">
-                {project.tags.map((tag) => (
+                {tags.map((tag) => (
                   <Link
                     key={tag.id}
                     to={`/search?tag=${tag.name}`}
@@ -165,20 +236,20 @@ const ProjectDetailPage: React.FC = () => {
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <div className="mb-4">
                 <p className="text-3xl font-bold text-gray-900">
-                  {project.current_amount.toLocaleString()} EGP
+                  {currentAmount.toLocaleString()} EGP
                 </p>
                 <p className="text-sm text-gray-500">
-                  raised of {project.total_target.toLocaleString()} EGP goal
+                  raised of {totalTarget.toLocaleString()} EGP goal
                 </p>
               </div>
               <div className="mb-2 h-3 overflow-hidden rounded-full bg-gray-200">
                 <div
                   className="h-full rounded-full bg-green-500 transition-all"
-                  style={{ width: `${Math.min(project.funded_pct, 100)}%` }}
+                  style={{ width: `${Math.min(fundedPct, 100)}%` }}
                 />
               </div>
               <p className="mb-4 text-sm text-gray-600">
-                {project.funded_pct.toFixed(1)}% funded
+                {fundedPct.toFixed(1)}% funded
               </p>
               {/* Placeholder — Dev 3 replaces with full DonationProgress */}
             </div>
@@ -215,31 +286,27 @@ const ProjectDetailPage: React.FC = () => {
               <div className="flex justify-between">
                 <span className="text-gray-500">Start</span>
                 <span className="font-medium text-gray-900">
-                  {new Date(project.start_date).toLocaleDateString()}
+                  {startDate ? new Date(startDate).toLocaleDateString() : "-"}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">End</span>
                 <span className="font-medium text-gray-900">
-                  {new Date(project.end_date).toLocaleDateString()}
+                  {endDate ? new Date(endDate).toLocaleDateString() : "-"}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Status</span>
                 <span
                   className={`font-medium ${
-                    project.is_running
+                    isRunning
                       ? "text-green-600"
-                      : project.is_cancelled
+                      : isCancelled
                         ? "text-red-600"
                         : "text-gray-600"
                   }`}
                 >
-                  {project.is_cancelled
-                    ? "Cancelled"
-                    : project.is_running
-                      ? "Running"
-                      : "Ended"}
+                  {isCancelled ? "Cancelled" : isRunning ? "Running" : "Ended"}
                 </span>
               </div>
             </div>
@@ -258,10 +325,10 @@ const ProjectDetailPage: React.FC = () => {
 
           {/* Cancel button — owner only, funded < 25% */}
           <CancelProjectBtn
-            projectId={project.id}
-            fundedPct={project.funded_pct}
+            projectId={projectIdValue}
+            fundedPct={fundedPct}
             isOwner={isOwner}
-            isCancelled={project.is_cancelled}
+            isCancelled={isCancelled}
           />
         </div>
       </div>
@@ -269,7 +336,7 @@ const ProjectDetailPage: React.FC = () => {
       {/* ═══════════════════════════════════════ */}
       {/* Similar Projects — full width bottom    */}
       {/* ═══════════════════════════════════════ */}
-      <SimilarProjects projectId={project.id} />
+      <SimilarProjects projectId={projectIdValue} />
     </PageWrapper>
   );
 };
