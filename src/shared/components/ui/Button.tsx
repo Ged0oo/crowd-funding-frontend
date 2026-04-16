@@ -1,19 +1,17 @@
 import type { ButtonHTMLAttributes } from "react";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "ghost";
 }
 
-export default function Button({
-  variant = "primary",
-  className = "",
-  ...props
-}: ButtonProps) {
-  const base = "rounded-md px-4 py-2 text-sm font-semibold transition";
-  const look =
-    variant === "primary"
-      ? "bg-amber-900 text-white hover:bg-amber-800"
-      : "bg-amber-100 text-amber-900 hover:bg-amber-200";
+const variantStyles = {
+  primary:   "bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-md hover:shadow-lg",
+  secondary: "bg-surface-container-high text-on-secondary-container hover:bg-surface-container",
+  ghost:     "text-primary hover:bg-surface-container-low",
+};
 
-  return <button className={`${base} ${look} ${className}`} {...props} />;
+export default function Button({ variant = "primary", className = "", ...props }: ButtonProps) {
+  const base = "inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none";
+
+  return <button className={`${base} ${variantStyles[variant]} ${className}`} {...props} />;
 }

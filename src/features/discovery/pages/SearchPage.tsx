@@ -1,34 +1,47 @@
 import { useSearchParams } from "react-router-dom";
+import { useSearch } from "../hooks/useSearch";
+import ProjectGrid from "../components/ProjectGrid";
+import Spinner from "../../../shared/components/ui/Spinner";
 
 export default function SearchPage() {
   const [params] = useSearchParams();
   const q = params.get("q") ?? "";
+  const { data, isLoading, isError } = useSearch(q);
 
   return (
-    <section className="space-y-5">
-      <header className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-        <h1 className="text-2xl font-bold text-stone-900">Search Results</h1>
-        <p className="mt-1 text-sm text-stone-600">
-          {q ? `Query: ${q}` : "No query provided"}
-        </p>
+    <section className="space-y-8">
+      <header>
+        <h1 className="text-3xl font-black font-headline text-on-surface">
+          {q ? `Results for "${q}"` : "Search Projects"}
+        </h1>
+        {data && (
+          <p className="mt-1 text-sm text-on-surface-variant">
+            {data.count} project{data.count !== 1 ? "s" : ""} found
+          </p>
+        )}
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <article
-            key={index}
-            className="rounded-xl border border-stone-200 bg-white p-4"
-          >
-            <div className="h-24 rounded-lg bg-stone-100" />
-            <h2 className="mt-3 text-base font-semibold text-stone-900">
-              Result Placeholder
-            </h2>
-            <p className="mt-1 text-sm text-stone-600">
-              Matching projects will be rendered from the API.
-            </p>
-          </article>
-        ))}
-      </div>
+      {!q && (
+        <p className="text-on-surface-variant">Enter a search term to find projects.</p>
+      )}
+
+      {isLoading && (
+        <div className="flex justify-center py-16">
+          <Spinner size="lg" />
+        </div>
+      )}
+
+      {isError && (
+        <p className="text-error">Something went wrong. Please try again.</p>
+      )}
+
+      {data && data.results.length === 0 && (
+        <p className="text-on-surface-variant">No projects match your search.</p>
+      )}
+
+      {data && data.results.length > 0 && (
+        <ProjectGrid projects={data.results} />
+      )}
     </section>
   );
 }

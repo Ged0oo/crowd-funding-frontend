@@ -1,5 +1,4 @@
-import Button from "../../../shared/components/ui/Button";
-import Input from "../../../shared/components/ui/Input";
+import RegisterForm from "../components/RegisterForm";
 
 export default function RegisterPage() {
   return (
@@ -8,25 +7,7 @@ export default function RegisterPage() {
       <p className="text-sm text-stone-600">
         Join CrowdFund Egypt and start supporting projects.
       </p>
-      <form className="grid gap-3 sm:grid-cols-2">
-        <Input placeholder="First name" />
-        <Input placeholder="Last name" />
-        <Input type="email" placeholder="Email" className="sm:col-span-2" />
-        <Input placeholder="Phone" className="sm:col-span-2" />
-        <Input
-          type="password"
-          placeholder="Password"
-          className="sm:col-span-2"
-        />
-        <Input
-          type="password"
-          placeholder="Confirm password"
-          className="sm:col-span-2"
-        />
-        <Button type="button" className="sm:col-span-2">
-          Create Account
-        </Button>
-      </form>
+      <RegisterForm/>
     </section>
   );
 }
