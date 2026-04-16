@@ -1,10 +1,23 @@
 export interface User {
-  id: number
-  email: string
-  first_name: string
-  last_name: string
-  profile_picture?: string | null
-  is_verified: boolean
+  id: string;
+  first_name: string;
+  last_name: string;
+  username: string;
+  email: string;
+  phone_number: string;
+  birthdate: string;
+  profile_picture: string | null;
+  facebook_profile: string | null;
+  country: string | null;
+  // is_active: boolean;
+  // is_staff: boolean;
+  // is_superuser: boolean;
+  // date_joined: string;
+  // created_at: string;
+  // deleted_at: string | null;
+  // last_login: string | null;
+  // groups: any[];
+  // user_permissions: any[]; 
 }
 
 export interface AuthState {
@@ -21,11 +34,20 @@ export interface LoginPayload {
 }
 
 export interface RegisterPayload {
-  first_name: string
-  last_name: string
-  email: string
-  phone: string
-  password: string
-  confirm_password: string
-  profile_picture?: File | null
+  first_name: string;
+  last_name: string;
+  username: string;
+  email: string;
+  phone_number: string;
+  password: string;
+  confirm_password: string;
+  profile_picture: string | null; 
+  facebook_profile: string | null;
+  birthdate: string;
+  country: string | null;
+}
+
+export interface OtpPayload {
+  email: string;
+  otp: string;
 }
