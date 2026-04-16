@@ -23,7 +23,7 @@ export interface ProjectCreator {
     profile_picture: string | null;
 }
 
-export interface ProjectCard {
+export interface ProjectCardProps {
     id: number
     title: string
     image: string
@@ -68,7 +68,8 @@ export interface ProjectFormData {
     total_target: number
     start_date: string
     end_date: string
-    tag_ids: number[]
+    tag_ids?: number[]
+    tags?: string[]
 }
 
 export interface ProjectListParams {
@@ -96,4 +97,54 @@ export interface SimilarProjectResponse {
 
 export interface TagAutoCompleteResponse {
     results: Tag[]
+}
+
+export interface ImageUploadResponse {
+    detail: string,
+    images: ProjectImage[];
+}
+
+export interface CancelResponse {
+    detail: string;
+    id: number;
+    is_cancelled: boolean;
+}
+
+export interface UploadImageVars {
+    files: File[];
+    onProgress?: (percent: number) => void;
+}
+
+export interface FileWithPreview {
+    file: File;
+    preview: string;
+    id: string;
+}
+
+export interface ImageUploaderProps {
+    images: FileWithPreview[];
+    onChange: (images: FileWithPreview[]) => void;
+    maxFiles?: number;
+    maxSizeMB?: number;
+}
+
+export interface TagInputProps {
+    tags: string[];
+    onChange: (tags: string[]) => void;
+    maxTags?: number;
+}
+
+export interface ImageSliderProps {
+    images: ProjectImage[];
+}
+
+export interface SimilarProjectsProps {
+    projectId: number;
+}
+
+export interface CancelProjectBtnProps {
+    projectId: number;
+    fundedPct: number;
+    isOwner: boolean;
+    isCancelled: boolean;
 }
