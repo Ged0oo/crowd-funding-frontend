@@ -28,6 +28,10 @@ export interface AuthState {
   logout: () => void
 }
 
+export interface GoogleAuthPayload {
+  access_token: string;
+}
+
 export interface LoginPayload {
   email: string
   password: string
