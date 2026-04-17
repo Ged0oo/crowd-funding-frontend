@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useHomepage } from "../hooks/useHomepage";
 import HeroSlider from "../components/HeroSlider";
 import CategoryPills from "../components/CategoryPills";
@@ -41,12 +42,12 @@ export default function HomePage() {
               Featured Campaigns
             </h2>
           </div>
-          <button className="text-primary font-bold flex items-center gap-2 group hover:underline underline-offset-4">
+          <Link to="/categories" className="text-primary font-bold flex items-center gap-2 group hover:underline underline-offset-4">
             View all projects
             <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
               arrow_forward
             </span>
-          </button>
+          </Link>
         </div>
         <ProjectGrid projects={data.featured5} />
       </section>
