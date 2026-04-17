@@ -9,7 +9,6 @@ import {
     uploadProjectImages,
 } from "../api/projectsApi";
 
-// ── Create (hook version — for simpler forms) ──
 export const useCreateProject = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -23,7 +22,6 @@ export const useCreateProject = () => {
     });
 };
 
-// ── Update ──────────────────────────────────
 export const useUpdateProject = (id: number) => {
     const queryClient = useQueryClient();
 
@@ -36,7 +34,6 @@ export const useUpdateProject = (id: number) => {
     });
 };
 
-// ── Delete ──────────────────────────────────
 
 export const useDeleteProject = () => {
     const queryClient = useQueryClient();
@@ -51,7 +48,6 @@ export const useDeleteProject = () => {
     });
 };
 
-// ── Cancel ──────────────────────────────────
 
 export const useCancelProject = (id: number) => {
     const queryClient = useQueryClient();

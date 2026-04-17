@@ -38,6 +38,7 @@ type RawProject = Partial<Project> & {
         is_cover?: boolean;
         order?: number;
     }> | null;
+    cover_image?: string | null;
     start_date?: string;
     end_date?: string;
     start_time?: string;
@@ -54,6 +55,17 @@ const normalizeStatus = (status: unknown): Project["status"] => {
     if (status === "cancelled") return "cancelled";
     if (status === "completed") return "completed";
     return "active";
+};
+
+const resolveMediaUrl = (url: string | null | undefined): string => {
+    if (!url) return "";
+    if (/^https?:\/\//i.test(url)) return url;
+
+    const base = import.meta.env.VITE_API_BASE_URL as string | undefined;
+    if (!base) return url;
+
+    const apiOrigin = new URL(base).origin;
+    return `${apiOrigin}${url.startsWith("/") ? "" : "/"}${url}`;
 };
 
 const normalizeProject = (raw: RawProject): Project => {
@@ -76,14 +88,41 @@ const normalizeProject = (raw: RawProject): Project => {
         : toNumber(raw.rating_count);
 
     const creator = raw.creator ?? raw.owner;
-    const media = Array.isArray(raw.media) ? raw.media : [];
-    const images = Array.isArray(raw.images)
-        ? raw.images
-        : media.map((item) => ({
-            id: toNumber(item.id),
-            image: item.image ?? "",
-            created_at: item.created_at ?? raw.created_at ?? new Date().toISOString(),
-        }));
+    const media = Array.isArray(raw.media)
+        ? [...raw.media].sort((a, b) => {
+            if (Boolean(a.is_cover) !== Boolean(b.is_cover)) {
+                return a.is_cover ? -1 : 1;
+            }
+            const orderA = toNumber(a.order);
+            const orderB = toNumber(b.order);
+            if (orderA !== orderB) return orderA - orderB;
+            return toNumber(a.id) - toNumber(b.id);
+        })
+        : [];
+    const imagesFromRaw = Array.isArray(raw.images)
+        ? raw.images.map((item) => ({
+            ...item,
+            image: resolveMediaUrl(item.image),
+        }))
+        : [];
+    const imagesFromMedia = media.map((item) => ({
+        id: toNumber(item.id),
+        image: resolveMediaUrl(item.image),
+        created_at: item.created_at ?? raw.created_at ?? new Date().toISOString(),
+    }));
+    const coverImage = resolveMediaUrl(raw.cover_image);
+    const coverAsImage = coverImage
+        ? [{
+            id: 0,
+            image: coverImage,
+            created_at: raw.created_at ?? new Date().toISOString(),
+        }]
+        : [];
+    const images = imagesFromRaw.length > 0
+        ? imagesFromRaw
+        : imagesFromMedia.length > 0
+            ? imagesFromMedia
+            : coverAsImage;
 
     const category = raw.category ?? {
         id: 0,

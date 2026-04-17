@@ -39,8 +39,6 @@ const CreateProjectPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { data: categories, isLoading: categoriesLoading } = useCategories();
 
-  // ── Step 1 Form ───────────────────────────
-
   const methods = useForm<ProjectDetailsFormData>({
     resolver: zodResolver(projectDetailsSchema),
     defaultValues: {
@@ -63,10 +61,7 @@ const CreateProjectPage: React.FC = () => {
     formState: { errors },
   } = methods;
 
-  // Watch values for review section
   const watchedValues = watch();
-
-  // ── Step navigation ───────────────────────
 
   const goToStep2 = async () => {
     const valid = await trigger();
@@ -77,8 +72,6 @@ const CreateProjectPage: React.FC = () => {
     if (images.length === 0) return;
     setStep(3);
   };
-
-  // ── Final submit ──────────────────────────
 
   const onSubmit = async () => {
     setIsSubmitting(true);
@@ -112,7 +105,6 @@ const CreateProjectPage: React.FC = () => {
         }
       }
 
-      // Cleanup previews
       images.forEach((img) => URL.revokeObjectURL(img.preview));
 
       queryClient.invalidateQueries({ queryKey: ["projects"] });
@@ -127,8 +119,6 @@ const CreateProjectPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
-
-  // ── Step indicator ────────────────────────
 
   const StepIndicator: React.FC = () => (
     <div className="mb-8">
@@ -196,7 +186,6 @@ const CreateProjectPage: React.FC = () => {
         <StepIndicator />
 
         <FormProvider {...methods}>
-          {/* ── STEP 1: Details ───────────────── */}
           {step === 1 && (
             <form
               onSubmit={handleSubmit(goToStep2)}
@@ -281,7 +270,6 @@ const CreateProjectPage: React.FC = () => {
             </form>
           )}
 
-          {/* ── STEP 2: Images ───────────────── */}
           {step === 2 && (
             <div className="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
               <div>
@@ -319,7 +307,6 @@ const CreateProjectPage: React.FC = () => {
             </div>
           )}
 
-          {/* ── STEP 3: Tags + Review ────────── */}
           {step === 3 && (
             <div className="space-y-6">
               {/* Tags section */}
@@ -330,14 +317,12 @@ const CreateProjectPage: React.FC = () => {
                 <TagInput tags={tags} onChange={setTags} />
               </div>
 
-              {/* Review summary */}
               <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                 <h2 className="mb-6 text-lg font-semibold text-gray-900">
                   Review Your Project
                 </h2>
 
                 <dl className="divide-y divide-gray-100">
-                  {/* Title */}
                   <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt className="text-sm font-medium text-gray-500">Title</dt>
                     <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
@@ -345,7 +330,6 @@ const CreateProjectPage: React.FC = () => {
                     </dd>
                   </div>
 
-                  {/* Details */}
                   <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt className="text-sm font-medium text-gray-500">
                       Details
@@ -355,7 +339,6 @@ const CreateProjectPage: React.FC = () => {
                     </dd>
                   </div>
 
-                  {/* Category */}
                   <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt className="text-sm font-medium text-gray-500">
                       Category
@@ -367,7 +350,6 @@ const CreateProjectPage: React.FC = () => {
                     </dd>
                   </div>
 
-                  {/* Funding target */}
                   <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt className="text-sm font-medium text-gray-500">
                       Funding Target
@@ -379,7 +361,6 @@ const CreateProjectPage: React.FC = () => {
                     </dd>
                   </div>
 
-                  {/* Dates */}
                   <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt className="text-sm font-medium text-gray-500">
                       Campaign Period
@@ -406,7 +387,6 @@ const CreateProjectPage: React.FC = () => {
                     </dd>
                   </div>
 
-                  {/* Images */}
                   <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt className="text-sm font-medium text-gray-500">
                       Images
@@ -440,7 +420,6 @@ const CreateProjectPage: React.FC = () => {
                     </dd>
                   </div>
 
-                  {/* Tags */}
                   <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt className="text-sm font-medium text-gray-500">Tags</dt>
                     <dd className="mt-1 sm:col-span-2 sm:mt-0">
@@ -466,7 +445,6 @@ const CreateProjectPage: React.FC = () => {
                 </dl>
               </div>
 
-              {/* Upload progress */}
               {isSubmitting && uploadProgress > 0 && (
                 <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
                   <div className="flex items-center gap-3">
@@ -491,7 +469,6 @@ const CreateProjectPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Error */}
               {submitError && (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4">
                   <div className="flex gap-3">
@@ -516,7 +493,6 @@ const CreateProjectPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Action buttons */}
               <div className="flex justify-between pt-2">
                 <Button
                   variant="secondary"

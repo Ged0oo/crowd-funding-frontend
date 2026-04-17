@@ -22,7 +22,6 @@ const SkeletonCard: React.FC = () => (
 const SimilarProjects: React.FC<SimilarProjectsProps> = ({ projectId }) => {
   const { data, isLoading, isError } = useSimilarProjects(projectId);
 
-  // Don't show section if error or empty
   if (isError) return null;
   if (!isLoading && (!data?.results || data.results.length === 0)) return null;
 
@@ -40,8 +39,7 @@ const SimilarProjects: React.FC<SimilarProjectsProps> = ({ projectId }) => {
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {isLoading
-          ? // Show 4 skeleton cards while loading
-            [1, 2, 3, 4].map((i) => <SkeletonCard key={i} />)
+          ? [1, 2, 3, 4].map((i) => <SkeletonCard key={i} />)
           : data?.results.map((project) => (
               <ProjectCard
                 key={project.id}
