@@ -26,13 +26,6 @@ export interface ProjectCreator {
 export interface ProjectCardProps {
     id: number
     title: string
-    image: string
-    funded_pct: number
-    avg_rating: number
-    category: string
-export interface ProjectCard {
-    id: number
-    title: string
     image: string | null
     funded_pct: number
     avg_rating: number

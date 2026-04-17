@@ -1,5 +1,12 @@
 import type { Category, ProjectCardProps } from './projects'
 
+export interface PaginatedResult<T> {
+  count: number
+  next: string | null
+  previous: string | null
+  results: T[]
+}
+
 export interface HomepageData {
     top5_rated: ProjectCardProps[]
     latest5: ProjectCardProps[]
@@ -7,10 +14,7 @@ export interface HomepageData {
     categories: Category[]
 }
 
-export interface SearchResult {
-    count: number
-    results: ProjectCardProps[]
-}
+export type SearchResult = PaginatedResult<ProjectCardProps>
 
 export interface CategoryWithProjects {
     category: Category

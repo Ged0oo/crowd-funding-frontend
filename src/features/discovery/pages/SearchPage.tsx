@@ -1,7 +1,19 @@
 import { useSearchParams } from "react-router-dom";
 import { useSearch } from "../hooks/useSearch";
 import ProjectGrid from "../components/ProjectGrid";
-import Spinner from "../../../shared/components/ui/Spinner";
+
+function SkeletonCard() {
+  return (
+    <div className="bg-surface-container-lowest rounded-[2rem] overflow-hidden border border-outline-variant/10 animate-pulse">
+      <div className="h-56 bg-surface-container-high" />
+      <div className="p-6 space-y-3">
+        <div className="h-5 bg-surface-container-high rounded-lg w-3/4" />
+        <div className="h-4 bg-surface-container-high rounded-lg w-1/2" />
+        <div className="h-2 bg-surface-container-high rounded-full mt-4" />
+      </div>
+    </div>
+  );
+}
 
 export default function SearchPage() {
   const [params] = useSearchParams();
@@ -22,12 +34,24 @@ export default function SearchPage() {
       </header>
 
       {!q && (
-        <p className="text-on-surface-variant">Enter a search term to find projects.</p>
+        <div className="flex flex-col items-center py-16 text-center">
+          <span className="material-symbols-outlined text-6xl text-outline/40 mb-4">
+            search
+          </span>
+          <p className="text-on-surface-variant text-lg">
+            Enter a search term to find projects.
+          </p>
+          <p className="text-on-surface-variant/60 text-sm mt-1">
+            Try searching by project title or tag name
+          </p>
+        </div>
       )}
 
       {isLoading && (
-        <div className="flex justify-center py-16">
-          <Spinner size="lg" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       )}
 
@@ -35,8 +59,18 @@ export default function SearchPage() {
         <p className="text-error">Something went wrong. Please try again.</p>
       )}
 
-      {data && data.results.length === 0 && (
-        <p className="text-on-surface-variant">No projects match your search.</p>
+      {data && data.results.length === 0 && q && (
+        <div className="flex flex-col items-center py-16 text-center">
+          <span className="material-symbols-outlined text-6xl text-outline/40 mb-4">
+            search_off
+          </span>
+          <p className="text-on-surface-variant text-lg">
+            No projects match "{q}"
+          </p>
+          <p className="text-on-surface-variant/60 text-sm mt-1">
+            Try different keywords or check your spelling
+          </p>
+        </div>
       )}
 
       {data && data.results.length > 0 && (
