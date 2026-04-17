@@ -8,11 +8,10 @@ import { useNavigate } from "react-router-dom";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterPayload>();
-  const { mutate: submitRegistration, isPending, isError } = useRegister();
+  const { setError, register, handleSubmit, watch, formState: { errors } } = useForm<RegisterPayload>();
+  const { mutate: submitRegistration, isPending, isError, error } = useRegister();
   const currentPassword = watch("password");
   const onSubmit: SubmitHandler<RegisterPayload> = (data) => {
-    console.log(data);
     submitRegistration(data, {
       onSuccess: (response) => {
         alert(`Account created successfuly please check your email!`);
@@ -21,8 +20,18 @@ const RegisterForm = () => {
           state: {email: response.data.User.email}
         });
       },
-      onError: (error) => {
-        console.error("Failed to register:", error);
+      onError: (err: any) => {
+        console.error("Failed to register:", err);
+        const serverErrors = err.response?.data?.["Error message"];
+        // If Django returns a dictionary of field errors, map them to the UI inputs securely
+        if (serverErrors && typeof serverErrors === 'object') {
+          Object.keys(serverErrors).forEach((field) => {
+            setError(field as any, { 
+              type: "server", 
+              message: Array.isArray(serverErrors[field]) ? serverErrors[field].join(" ") : serverErrors[field] 
+            });
+          });
+        }
       }
     })};
 
@@ -142,7 +151,7 @@ const RegisterForm = () => {
           {errors.confirm_password && <span className="text-red-500 text-xs">{errors.confirm_password.message}</span>}
         </div>
 
-        {isError && (
+        {isError && !(error as any)?.response?.data?.["Error message"] && (
           <p className="text-red-500 text-sm sm:col-span-2 font-semibold">
             Registration failed. Please check your details and try again.
           </p>
@@ -160,8 +169,4 @@ const RegisterForm = () => {
   );
 }
 
-export default RegisterForm
-
-function watch(arg0: string) {
-    throw new Error("Function not implemented.");
-}
+export default RegisterForm;
