@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Star } from "lucide-react";
 import { useRating } from "../hooks/useRating";
+import { useAuthStore } from "../../auth/stores/authStore";
 import { toast } from "sonner";
 
 interface StarRatingProps {
@@ -13,10 +15,18 @@ export default function StarRating({
   initialRating = 0,
 }: StarRatingProps) {
   const [hover, setHover] = useState(0);
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
 
   const { mutateAsync: rate, isPending } = useRating(projectId);
 
   const handleRate = async (value: number) => {
+    if (!user) {
+      toast.info("Please login to rate this project");
+      navigate("/authenticate");
+      return;
+    }
+
     try {
       await rate(value);
       toast.success(`You rated this ${value} stars!`);

@@ -1,11 +1,14 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { MessageSquare, Trash2, CornerDownRight } from "lucide-react"
 import { formatRelativeTime } from "../../../shared/utils/dateUtils"
 import type { Comment } from "../../../types/social"
 import { useReplies } from "../hooks/useReplies"
 import { useAuthStore } from "../../../app/store"
+import { toast } from "sonner"
 import CommentForm from "./CommentForm"
 import Button from "../../../shared/components/ui/Button"
+import ReportButton from './ReportButton'
 
 interface CommentItemProps {
   comment: Comment
@@ -23,10 +26,20 @@ export default function CommentItem({
   isReply = false,
 }: CommentItemProps) {
   const [isReplying, setIsReplying] = useState(false)
+  const navigate = useNavigate()
   const { reply, isReplying: isSubmittingReply } = useReplies(projectId)
   const user = useAuthStore((state) => state.user)
 
   const isOwner = user?.id === comment.user.id
+
+  const handleReplyClick = () => {
+    if (!user) {
+      toast.info("Please login to reply to this comment")
+      navigate("/authenticate")
+      return
+    }
+    setIsReplying(!isReplying)
+  }
 
   const handleReply = async (content: string) => {
     await reply({ commentId: comment.id, content })
@@ -56,7 +69,7 @@ export default function CommentItem({
             {!isReply && (
               <Button
                 variant="ghost"
-                onClick={() => setIsReplying(!isReplying)}
+                onClick={handleReplyClick}
                 className="!px-2 !py-1 !text-xs gap-1.5 text-secondary"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
@@ -74,6 +87,13 @@ export default function CommentItem({
                 <Trash2 className="w-3.5 h-3.5" />
                 {isDeleting ? "Deleting..." : "Delete"}
               </Button>
+            )}
+
+            {!isOwner && (
+              <ReportButton 
+                type="comment" 
+                targetId={comment.id} 
+              />
             )}
           </div>
 

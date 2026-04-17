@@ -2,6 +2,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useDonate } from "../hooks/useDonate"
+import { useAuthStore } from "../../auth/stores/authStore"
+import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import Input from "../../../shared/components/ui/Input"
 import Button from "../../../shared/components/ui/Button"
@@ -22,6 +24,8 @@ interface DonateWidgetProps {
 }
 
 export default function DonateWidget({ projectId }: DonateWidgetProps) {
+  const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
   const { donate, isDonating } = useDonate(projectId)
 
   const {
@@ -35,6 +39,12 @@ export default function DonateWidget({ projectId }: DonateWidgetProps) {
   })
 
   const onSubmit = async (data: DonateFormValues) => {
+    if (!user) {
+      toast.info("Please login to support this project")
+      navigate("/authenticate")
+      return
+    }
+
     const amountToDonate = data.amount
     reset({ amount: 10 })
     

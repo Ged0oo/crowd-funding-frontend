@@ -1,7 +1,10 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { useNavigate } from "react-router-dom"
+import { useAuthStore } from "../../../app/store"
 import { SendHorizonal } from "lucide-react"
+import { toast } from "sonner"
 import Textarea from "../../../shared/components/ui/Textarea"
 import Button from "../../../shared/components/ui/Button"
 import Spinner from "../../../shared/components/ui/Spinner"
@@ -29,6 +32,9 @@ export default function CommentForm({
   onCancel,
   initialValue = "",
 }: CommentFormProps) {
+  const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
+
   const {
     register,
     handleSubmit,
@@ -40,6 +46,12 @@ export default function CommentForm({
   })
 
   const handleFormSubmit = async (data: CommentFormValues) => {
+    if (!user) {
+      toast.info("Please login to post a comment")
+      navigate("/authenticate")
+      return
+    }
+
     try {
       await onSubmit(data.content)
       reset()
