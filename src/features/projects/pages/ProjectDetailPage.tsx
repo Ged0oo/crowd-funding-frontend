@@ -9,6 +9,11 @@ import CancelProjectBtn from "../components/CancelProjectBtn";
 import Badge from "../../../shared/components/ui/Badge";
 import Spinner from "../../../shared/components/ui/Spinner";
 import PageWrapper from "../../../shared/components/layout/PageWrapper";
+import CommentThread from '../../social/components/CommentThread';
+import DonationProgress from '../../social/components/DonationProgress';
+import DonateWidget from '../../social/components/DonateWidget';
+import StarRating from '../../social/components/StarRating';
+import ReportButton from '../../social/components/ReportButton';
 
 const toNumber = (value: unknown): number => {
   const parsed = Number(value);
@@ -206,16 +211,8 @@ const ProjectDetailPage: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* ═══════════════════════════════════ */}
-          {/* SLOT: Comment Thread (Dev 3)        */}
-          {/* Dev 3 mounts <CommentThread />      */}
-          {/* ═══════════════════════════════════ */}
           <section id="comments-slot" className="border-t border-gray-200 pt-8">
-            {/* <CommentThread projectId={project.id} /> */}
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center text-gray-400">
-              💬 Comment Thread — Dev 3 mounts here
-            </div>
+            <CommentThread projectId={projectIdValue} />
           </section>
         </div>
 
@@ -223,57 +220,29 @@ const ProjectDetailPage: React.FC = () => {
         {/* RIGHT COLUMN — Sidebar (1/3)            */}
         {/* ════════════════════════════════════════ */}
         <div className="space-y-6">
-          {/* ═══════════════════════════════════ */}
-          {/* SLOT: Donation Progress (Dev 3)     */}
-          {/* Dev 3 mounts <DonationProgress />   */}
-          {/* ═══════════════════════════════════ */}
           <section id="donation-progress-slot">
-            {/* <DonationProgress
-                  currentAmount={project.current_amount}
-                  totalTarget={project.total_target}
-                  fundedPct={project.funded_pct}
-                /> */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="mb-4">
-                <p className="text-3xl font-bold text-gray-900">
-                  {currentAmount.toLocaleString()} EGP
-                </p>
-                <p className="text-sm text-gray-500">
-                  raised of {totalTarget.toLocaleString()} EGP goal
-                </p>
-              </div>
-              <div className="mb-2 h-3 overflow-hidden rounded-full bg-gray-200">
-                <div
-                  className="h-full rounded-full bg-green-500 transition-all"
-                  style={{ width: `${Math.min(fundedPct, 100)}%` }}
-                />
-              </div>
-              <p className="mb-4 text-sm text-gray-600">
-                {fundedPct.toFixed(1)}% funded
-              </p>
-              {/* Placeholder — Dev 3 replaces with full DonationProgress */}
+            <div className="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/10 shadow-card">
+              <DonationProgress 
+                current={currentAmount} 
+                target={totalTarget} 
+                percentage={fundedPct} 
+              />
             </div>
           </section>
 
-          {/* ═══════════════════════════════════ */}
-          {/* SLOT: Donate Widget (Dev 3)         */}
-          {/* Dev 3 mounts <DonateWidget />       */}
-          {/* ═══════════════════════════════════ */}
           <section id="donate-widget-slot">
-            {/* <DonateWidget projectId={project.id} isRunning={project.is_running} /> */}
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center text-gray-400">
-              💰 Donate Widget — Dev 3 mounts here
-            </div>
+            <DonateWidget projectId={projectIdValue} />
           </section>
 
-          {/* ═══════════════════════════════════ */}
-          {/* SLOT: Star Rating (Dev 3)           */}
-          {/* Dev 3 mounts <StarRating />         */}
-          {/* ═══════════════════════════════════ */}
           <section id="star-rating-slot">
-            {/* <StarRating projectId={project.id} avgRating={project.avg_rating} ratingCount={project.rating_count} /> */}
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center text-gray-400">
-              ⭐ Star Rating — Dev 3 mounts here
+            <div className="flex items-center gap-4 py-6 border-y border-outline-variant/10">
+              <span className="text-sm font-bold text-secondary uppercase tracking-widest">
+                Rate this project:
+              </span>
+              <StarRating 
+                projectId={projectIdValue} 
+                initialRating={toNumber(rawProject.avg_rating || rawProject.average_rating)} 
+              />
             </div>
           </section>
 
@@ -312,14 +281,9 @@ const ProjectDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* ═══════════════════════════════════ */}
-          {/* SLOT: Report Button (Dev 3)         */}
-          {/* Dev 3 mounts <ReportButton />       */}
-          {/* ═══════════════════════════════════ */}
           <section id="report-button-slot">
-            {/* <ReportButton targetType="project" targetId={project.id} /> */}
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-4 text-center text-gray-400">
-              🚩 Report Button — Dev 3 mounts here
+            <div className="flex justify-center">
+              <ReportButton targetId={projectIdValue} type="project" />
             </div>
           </section>
 
