@@ -1,10 +1,11 @@
+import api from "../../../services/axios"
 import type { 
   Donation, 
   Comment, 
   Rating, 
   Report, 
   DonationHistoryItem 
-} from "../../../types/social"
+} from "../../../types/social";
 
 export interface PaginatedResponse<T> {
   count: number;
@@ -13,80 +14,56 @@ export interface PaginatedResponse<T> {
   results: T[];
 }
 
-const BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"
-
-/**
- * Helper for handling JSON requests to reduce boilerplate
- * TODO: consider global error handling/logging
- */
-async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${endpoint}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-  })
-
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.detail || `API Error: ${res.status}`)
-  }
-
-  if (!res.body) return {} as T;
-
-  return res.json()
-}
-
 // --- Donations ---
 
-export const donateToProject = (projectId: number, amount: number) => 
-  apiFetch<Donation>(`/projects/${projectId}/donate/`, {
-    method: 'POST',
-    body: JSON.stringify({ amount })
-  })
+export const donateToProject = async (projectId: number, amount: number) => {
+  const { data } = await api.post<Donation>(`/projects/${projectId}/donate/`, { amount });
+  return data;
+};
 
-export const getUserDonations = () => 
-  apiFetch<DonationHistoryItem[]>('/users/me/donations/')
+export const getUserDonations = async () => {
+  const { data } = await api.get<DonationHistoryItem[]>('/users/me/donations/');
+  return data;
+};
 
 // --- Comments & Replies ---
 
-export const getProjectComments = (projectId: number, page: number = 1) => 
-  apiFetch<PaginatedResponse<Comment>>(`/projects/${projectId}/comments/?page=${page}`)
+export const getProjectComments = async (projectId: number, page: number = 1) => {
+  const { data } = await api.get<PaginatedResponse<Comment>>(`/projects/${projectId}/comments/`, {
+    params: { page }
+  });
+  return data;
+};
 
-export const postComment = (projectId: number, content: string) => 
-  apiFetch<Comment>(`/projects/${projectId}/comments/`, {
-    method: 'POST',
-    body: JSON.stringify({ content })
-  })
+export const postComment = async (projectId: number, content: string) => {
+  const { data } = await api.post<Comment>(`/projects/${projectId}/comments/`, { content });
+  return data;
+};
 
-export const postReply = (commentId: number, content: string) => 
-  apiFetch<Comment>(`/comments/${commentId}/replies/`, {
-    method: 'POST',
-    body: JSON.stringify({ content })
-  })
+export const postReply = async (commentId: number, content: string) => {
+  const { data } = await api.post<Comment>(`/comments/${commentId}/replies/`, { content });
+  return data;
+};
 
-export const deleteComment = (commentId: number) => 
-  apiFetch<void>(`/comments/${commentId}/`, { method: 'DELETE' })
+export const deleteComment = async (commentId: number) => {
+  await api.delete(`/comments/${commentId}/`);
+};
 
 // --- Ratings ---
 
-export const rateProject = (projectId: number, value: number) => 
-  apiFetch<Rating>(`/projects/${projectId}/rate/`, {
-    method: 'POST',
-    body: JSON.stringify({ value })
-  })
+export const rateProject = async (projectId: number, value: number) => {
+  const { data } = await api.post<Rating>(`/projects/${projectId}/rate/`, { value });
+  return data;
+};
 
 // --- Reports ---
 
-export const reportProject = (projectId: number, reason: string) => 
-  apiFetch<Report>(`/projects/${projectId}/report/`, {
-    method: 'POST',
-    body: JSON.stringify({ reason })
-  })
+export const reportProject = async (projectId: number, reason: string) => {
+  const { data } = await api.post<Report>(`/projects/${projectId}/report/`, { reason });
+  return data;
+};
 
-export const reportComment = (commentId: number, reason: string) => 
-  apiFetch<Report>(`/comments/${commentId}/report/`, {
-    method: 'POST',
-    body: JSON.stringify({ reason })
-  })
+export const reportComment = async (commentId: number, reason: string) => {
+  const { data } = await api.post<Report>(`/comments/${commentId}/report/`, { reason });
+  return data;
+};
