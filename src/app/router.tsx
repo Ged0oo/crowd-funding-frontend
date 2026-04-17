@@ -9,6 +9,7 @@ import CategoryPage from "../features/discovery/pages/CategoryPage";
 import SearchPage from "../features/discovery/pages/SearchPage";
 import AuthPage from "../features/auth/pages/authPage";
 import OtpPage from "../features/auth/pages/OtpPage";
+import MyProfilePage from "../features/auth/pages/MyProfilePage";
 // import ActivatePage from "../features/auth/pages/ActivatePage";
 import ForgotPasswordPage from "../features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "../features/auth/pages/ResetPasswordPage";
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: "projects/:id", element: <ProjectDetailPage /> },
       { path: "authenticate", element: <AuthPage/>},
       { path: "verify-otp", element: <OtpPage/>},
+      { path: "my-profile", element: <MyProfilePage/>},
       // { path: "login", element: <LoginPage /> },
       // { path: "register", element: <RegisterPage /> },
       // { path: "activate/:token", element: <ActivatePage /> },

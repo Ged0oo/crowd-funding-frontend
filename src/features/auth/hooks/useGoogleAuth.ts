@@ -2,17 +2,25 @@ import { verfiyGoogleAuth } from "../api/authApi";
 import { useMutation } from "@tanstack/react-query";
 import { type GoogleAuthPayload } from "../../../types/auth";
 
+import { useAuthStore } from "../stores/authStore";
+
 export const useGoogleAuth = () => {
     return useMutation({
         mutationFn: (token: GoogleAuthPayload) => verfiyGoogleAuth(token),
         onSuccess: (response) => {
-            console.log('successful google login')
-            const {access, refresh} = response.data;
+            console.log('successful google login. Payload is:', response.data);
+            
+            // Django might return `access` or `access_token` depending on jwt serialization config
+            const access = response.data.access || response.data.access_token || response.data.key;
+            const refresh = response.data.refresh || response.data.refresh_token;
 
-            if (access && refresh)
-            {
-                localStorage.setItem('access_token', access);
-                localStorage.setItem('refresh_token', refresh);
+            if (access) {
+                useAuthStore.getState().setAccessToken(access);
+                if (refresh) {
+                    localStorage.setItem('refreshToken', refresh);
+                }
+            } else {
+                console.error("Tokens were missing from the backend response!", response.data);
             }
         },
         onError: (error) => {

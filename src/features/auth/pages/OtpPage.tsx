@@ -1,21 +1,50 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useOtp } from "../hooks/useOtp";
+import { useOtp, useResendOtp } from "../hooks/useOtp";
 
 const OtpPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const userEmail = location.state?.email || "";
-
+  const action = location.state?.action || "activation";
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const {mutate: verifyOtpMutation, isPending, isError } = useOtp();
+  const [timeLeft, setTimeLeft] = useState(120);
 
-  const handleSubmit = (e: React.FocusEvent) => {
+  const {mutate: verifyOtpMutation, isPending, isError, error } = useOtp();
+  const {mutate: resendOtpMutation, isPending: isResending } = useResendOtp();
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timerId);
+    }
+  }, [timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  const handleResend = () => {
+    if (timeLeft === 0 && userEmail) {
+      resendOtpMutation(userEmail, {
+        onSuccess: () => setTimeLeft(120),
+      });
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const completeOtp = otp.join("");
+
+    if (action === "reset_password") {
+       navigate('/reset-password', { state: { email: userEmail, otp: completeOtp } });
+       return;
+    }
 
     verifyOtpMutation(
       {email: userEmail, otp: completeOtp},
@@ -82,7 +111,7 @@ const OtpPage = () => {
                   <input
                     key={index}
                     // Assign the ref to our array
-                    ref={(el) => (inputRefs.current[index] = el)} 
+                    ref={(el) => { inputRefs.current[index] = el; }} 
                     type="text"
                     maxLength={1}
                     value={digit}
@@ -95,8 +124,16 @@ const OtpPage = () => {
 
               {/* Buttons Area */}
               <div className="flex flex-col gap-6">
+
+                {isError && (
+                  <p className="text-red-500 text-sm font-semibold text-center bg-red-50 p-2 rounded-lg border border-red-100">
+                    {(error as any)?.response?.data?.error || "Invalid verification code. Please try again."}
+                  </p>
+                )}
+
                 <button 
                   type="submit"
+                  disabled={isPending}
                   className="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary text-lg font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform active:scale-[0.98]"
                 >
                   Verify & Continue
@@ -105,12 +142,21 @@ const OtpPage = () => {
                 <div className="flex flex-col items-center gap-2">
                   <p className="text-sm text-secondary">
                     Didn't receive the code? 
-                    <button type="button" className="text-primary font-bold hover:underline ml-1">Resend</button>
+                    <button 
+                      type="button" 
+                      onClick={handleResend}
+                      disabled={timeLeft > 0 || isResending}
+                      className={`font-bold ml-1 ${timeLeft > 0 || isResending ? 'text-secondary/50 cursor-not-allowed' : 'text-primary hover:underline transition-colors'}`}
+                    >
+                      {isResending ? "Resending..." : "Resend"}
+                    </button>
                   </p>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-outline tracking-wider uppercase bg-surface-container-high px-3 py-1 rounded-full mt-2">
-                    <span className="material-symbols-outlined text-xs">timer</span>
-                    <span>Resend available in 02:00</span>
-                  </div>
+                  {timeLeft > 0 && (
+                    <div className="flex items-center gap-2 text-xs font-semibold text-outline tracking-wider uppercase bg-surface-container-high px-3 py-1 rounded-full mt-2">
+                      <span className="material-symbols-outlined text-xs">timer</span>
+                      <span>Resend available in {formatTime(timeLeft)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </form>

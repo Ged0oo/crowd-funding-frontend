@@ -1,19 +1,51 @@
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../app/store";
+import { logoutApi } from "../../../features/auth/api/authApi";
+import { useMyProfile } from "../../../features/auth/hooks/useMyProfile";
 import Avatar from "../ui/Avatar";
 import SearchBar from "../../../features/discovery/components/SearchBar";
 
 const NAV_LINKS = [
-  { to: "/",            label: "Discover" },
-  { to: "/categories",  label: "Featured"  },
+  { to: "/", label: "Discover" },
+  { to: "/categories", label: "Featured" },
   { to: "/projects/create", label: "Start Project" },
 ];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const accessToken = useAuthStore((state) => state.accessToken);
   const logout = useAuthStore((state) => state.logout);
+  const navigate = useNavigate();
+
+  const { data: profileResponse } = useMyProfile();
+  const fetchedUser = profileResponse?.data?.data || profileResponse?.data;
+  const displayUser = fetchedUser || user;
+
+  const parseProfilePicture = (url: string | undefined | null) => {
+    if (!url) return undefined;
+    if (url.includes('googleusercontent.com')) {
+      const decoded = decodeURIComponent(url);
+      const match = decoded.match(/(https:\/\/.+)/);
+      if (match) return match[0];
+    }
+    return url;
+  };
+
+  const links = useMemo(
+    () => [
+      { to: "/", label: "Home" },
+      { to: "/categories", label: "Categories" },
+      { to: "/projects/create", label: "Start Project" },
+    ],
+    [],
+  );
+  function handleSearch(e: { preventDefault(): void }) {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) navigate(`/search?q=${encodeURIComponent(q)}`);
+  }
 
   return (
     <header className="fixed top-0 z-50 w-full bg-white/80 backdrop-blur-md shadow-sm">
@@ -48,41 +80,43 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          {user ? (
+          {accessToken ? (
             <>
               <NavLink
-                to="/profile"
+                to="/my-profile"
                 className="text-sm font-medium text-on-surface-variant hover:bg-surface-container-low rounded-lg px-3 py-2 transition-colors"
               >
                 Profile
               </NavLink>
               <button
                 type="button"
-                onClick={logout}
+                onClick={async () => {
+                  const refresh = localStorage.getItem("refreshToken");
+                  if (refresh) {
+                    try { await logoutApi(refresh); } catch (e) { console.error(e); }
+                  }
+                  logout();
+                }}
                 className="text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low rounded-xl px-4 py-2 transition-colors"
               >
                 Log Out
               </button>
-              <Avatar
-                src={user.profile_picture}
-                initials={(user.first_name.charAt(0) + user.last_name.charAt(0)).toUpperCase()}
-              />
+              <Link to="/my-profile" className="hover:opacity-80 transition-opacity shrink-0">
+                <Avatar
+                  src={parseProfilePicture(displayUser?.profile_picture)}
+                  initials={displayUser?.first_name ? (
+                    displayUser.first_name.charAt(0) + (displayUser.last_name ? displayUser.last_name.charAt(0) : "")
+                  ).toUpperCase() : displayUser?.username ? displayUser.username.charAt(0).toUpperCase() : "?"}
+                />
+              </Link>
             </>
           ) : (
-            <>
-              <NavLink
-                to="/login"
-                className="text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low rounded-xl px-4 py-2 transition-colors"
-              >
-                Log In
-              </NavLink>
-              <NavLink
-                to="/authenticate"
-                className="rounded-xl bg-linear-to-br from-primary to-primary-container px-5 py-2.5 text-sm font-bold text-on-primary shadow-md active:scale-95 transition-all duration-200"
-              >
-                Start Now
-              </NavLink>
-            </>
+            <NavLink
+              to="/authenticate"
+              className="rounded-xl bg-linear-to-br from-primary to-primary-container px-5 py-2.5 text-sm font-bold text-on-primary shadow-md active:scale-95 transition-all duration-200"
+            >
+              Start Now
+            </NavLink>
           )}
         </div>
 
@@ -119,24 +153,38 @@ export default function Navbar() {
             </NavLink>
           ))}
 
-          {user ? (
+          {accessToken ? (
             <>
-              <NavLink to="/profile" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 text-sm font-medium text-on-surface-variant hover:bg-surface-container-low">
+              <NavLink
+                to="/my-profile"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-xl px-4 py-2.5 text-sm font-medium text-on-surface-variant hover:bg-surface-container-low"
+              >
                 Profile
               </NavLink>
-              <button type="button" onClick={() => { logout(); setMenuOpen(false); }} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-left text-on-surface-variant hover:bg-surface-container-low">
+              <button
+                type="button"
+                onClick={async () => {
+                  const refresh = localStorage.getItem("refreshToken");
+                  if (refresh) {
+                    try { await logoutApi(refresh); } catch (e) { console.error(e); }
+                  }
+                  logout();
+                  setMenuOpen(false);
+                }}
+                className="rounded-xl px-4 py-2.5 text-sm font-semibold text-left text-on-surface-variant hover:bg-surface-container-low"
+              >
                 Log Out
               </button>
             </>
           ) : (
-            <>
-              <NavLink to="/login" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 text-sm font-medium text-on-surface-variant hover:bg-surface-container-low">
-                Log In
-              </NavLink>
-              <NavLink to="/authenticate" onClick={() => setMenuOpen(false)} className="rounded-xl bg-linear-to-br from-primary to-primary-container px-5 py-2.5 text-sm font-bold text-on-primary text-center">
-                Start Now
-              </NavLink>
-            </>
+            <NavLink
+              to="/authenticate"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-xl bg-linear-to-br from-primary to-primary-container px-5 py-2.5 text-sm font-bold text-on-primary text-center"
+            >
+              Start Now
+            </NavLink>
           )}
         </div>
       )}

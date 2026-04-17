@@ -6,8 +6,8 @@ import Input from '../../../shared/components/ui/Input';
 import Button from '../../../shared/components/ui/Button';
 
 const LoginForm = () => {
-  const {register, handleSubmit, formState: { errors }} = useForm<LoginPayload>()
-  const {mutate: submitLogin, isPending, isError} = useLogin();
+  const {register, handleSubmit, formState: { errors }} = useForm<LoginPayload>();
+  const {mutate: submitLogin, isPending, isError, error} = useLogin();
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<LoginPayload> = (data) => {
@@ -46,10 +46,20 @@ const LoginForm = () => {
           })}
         />
         {errors.password && <span className="text-red-500 text-xs">{errors.password.message}</span>}
+        
+        <div className="flex justify-end mt-2">
+          <button 
+            type="button" 
+            onClick={() => navigate("/forgot-password")}
+            className="text-sm font-bold text-primary hover:underline transition-colors"
+          >
+            Forgot password?
+          </button>
+        </div>
       </div>
       {isError && (
           <p className="text-red-500 text-sm sm:col-span-2 font-semibold">
-            
+            {(error as any)?.response?.data?.["Error messgae"] || (error as any)?.response?.data?.["Error message"] || "Login failed! Please check your credentials and try again."}
           </p>
         )}
       <Button 
