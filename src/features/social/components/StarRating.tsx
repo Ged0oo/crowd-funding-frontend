@@ -1,26 +1,29 @@
-import { useState } from "react"
-import { Star } from "lucide-react"
-import { useRating } from "../hooks/useRating"
-import { toast } from "sonner"
+import { useState } from "react";
+import { Star } from "lucide-react";
+import { useRating } from "../hooks/useRating";
+import { toast } from "sonner";
 
 interface StarRatingProps {
-  projectId: number
-  initialRating?: number
+  projectId: number;
+  initialRating?: number;
 }
 
-export default function StarRating({ projectId, initialRating = 0 }: StarRatingProps) {
-  const [hover, setHover] = useState(0)
-  
-  const { mutateAsync: rate, isPending } = useRating(projectId)
+export default function StarRating({
+  projectId,
+  initialRating = 0,
+}: StarRatingProps) {
+  const [hover, setHover] = useState(0);
+
+  const { mutateAsync: rate, isPending } = useRating(projectId);
 
   const handleRate = async (value: number) => {
     try {
-      await rate(value)
-      toast.success(`You rated this ${value} stars!`)
-    } catch{
-      toast.error("Failed to save rating")
+      await rate(value);
+      toast.success(`You rated this ${value} stars!`);
+    } catch {
+      toast.error("Failed to save rating");
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-1">
@@ -45,7 +48,7 @@ export default function StarRating({ projectId, initialRating = 0 }: StarRatingP
             />
           </button>
         ))}
-        
+
         {initialRating > 0 && (
           <span className="ml-2 font-bold text-on-surface font-headline">
             {initialRating.toFixed(1)}
@@ -53,5 +56,5 @@ export default function StarRating({ projectId, initialRating = 0 }: StarRatingP
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -5,11 +5,6 @@ import ProjectCard from "../components/ProjectCard";
 import Spinner from "../../../shared/components/ui/Spinner";
 import PageWrapper from "../../../shared/components/layout/PageWrapper";
 
-const toNumber = (value: unknown): number => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-
 const ProjectsPage: React.FC = () => {
   const { data, isLoading, isError, error } = useProjects();
   const projects = data?.results ?? [];
@@ -54,51 +49,18 @@ const ProjectsPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((project) => {
-              const rawProject = project as unknown as {
-                id: number;
-                title: string;
-                images?: Array<{ image?: string | null }>;
-                cover_image?: string | null;
-                funded_pct?: number | string;
-                avg_rating?: number | string;
-                average_rating?: number | string;
-                total_target?: number | string;
-                current_amount?: number | string;
-                current_donations?: number | string;
-                category?: { name?: string } | null;
-              };
-
-              const totalTarget = toNumber(rawProject.total_target);
-              const currentAmount =
-                toNumber(rawProject.current_donations) ||
-                toNumber(rawProject.current_amount);
-
-              const fundedPct =
-                rawProject.funded_pct !== undefined
-                  ? toNumber(rawProject.funded_pct)
-                  : totalTarget > 0
-                    ? (currentAmount / totalTarget) * 100
-                    : 0;
-
-              const avgRating =
-                rawProject.avg_rating !== undefined
-                  ? toNumber(rawProject.avg_rating)
-                  : toNumber(rawProject.average_rating);
-
               const image =
-                rawProject.images?.[0]?.image ||
-                rawProject.cover_image ||
-                "/placeholder-project.jpg";
+                project.images[0]?.image ?? "/placeholder-project.jpg";
 
               return (
                 <ProjectCard
-                  key={rawProject.id}
-                  id={rawProject.id}
-                  title={rawProject.title}
+                  key={project.id}
+                  id={project.id}
+                  title={project.title}
                   image={image}
-                  funded_pct={fundedPct}
-                  avg_rating={avgRating}
-                  category={rawProject.category?.name ?? "Uncategorized"}
+                  funded_pct={project.funded_pct}
+                  avg_rating={project.avg_rating}
+                  category={project.category?.name ?? "Uncategorized"}
                 />
               );
             })}

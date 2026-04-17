@@ -7,7 +7,6 @@ import type {
     SimilarProjectResponse,
 } from "../../../types/projects";
 
-
 export const useProject = (id: number) => {
     return useQuery<Project, Error>({
         queryKey: ["project", id],

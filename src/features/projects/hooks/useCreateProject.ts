@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-
+import type { Project, ProjectFormData, CancelResponse, UploadImageVars } from "../../../types/projects";
 import {
     createProject,
     updateProject,
@@ -9,17 +9,15 @@ import {
     uploadProjectImages,
 } from "../api/projectsApi";
 
-import type { Project, ProjectFormData, CancelResponse, UploadImageVars } from "../../../types/projects";
-
 export const useCreateProject = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
     return useMutation<Project, Error, ProjectFormData>({
         mutationFn: createProject,
-        onSuccess: (data) => {
+        onSuccess: (project) => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
-            navigate(`/projects/${data.id}`);
+            navigate(`/projects/${project.id}`);
         },
     });
 };
@@ -36,6 +34,7 @@ export const useUpdateProject = (id: number) => {
     });
 };
 
+
 export const useDeleteProject = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -49,6 +48,7 @@ export const useDeleteProject = () => {
     });
 };
 
+
 export const useCancelProject = (id: number) => {
     const queryClient = useQueryClient();
 
@@ -60,6 +60,7 @@ export const useCancelProject = (id: number) => {
         },
     });
 };
+
 
 export const useUploadImages = (projectId: number) => {
     const queryClient = useQueryClient();

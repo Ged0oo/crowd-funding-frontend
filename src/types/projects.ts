@@ -26,6 +26,15 @@ export interface ProjectCreator {
 export interface ProjectCardProps {
     id: number
     title: string
+    image: string
+    funded_pct: number
+    avg_rating: number
+    category: string
+}
+
+export interface ProjectCard {
+    id: number
+    title: string
     image: string | null
     funded_pct: number
     avg_rating: number
@@ -119,13 +128,16 @@ export interface FileWithPreview {
     file: File;
     preview: string;
     id: string;
+    progress: number;
+    status: "pending" | "uploading" | "done" | "error";
+    errorMsg?: string;
 }
-
 export interface ImageUploaderProps {
     images: FileWithPreview[];
     onChange: (images: FileWithPreview[]) => void;
     maxFiles?: number;
     maxSizeMB?: number;
+    disabled?: boolean;
 }
 
 export interface TagInputProps {
@@ -148,3 +160,12 @@ export interface CancelProjectBtnProps {
     isOwner: boolean;
     isCancelled: boolean;
 }
+
+export interface CampaignDatesCardProps {
+    startDate: string;
+    endDate: string;
+    isRunning: boolean;
+    isCancelled: boolean;
+    createdAt: string;
+}
+

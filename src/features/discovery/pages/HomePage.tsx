@@ -42,7 +42,10 @@ export default function HomePage() {
               Featured Campaigns
             </h2>
           </div>
-          <Link to="/categories" className="text-primary font-bold flex items-center gap-2 group hover:underline underline-offset-4">
+          <Link
+            to="/categories"
+            className="text-primary font-bold flex items-center gap-2 group hover:underline underline-offset-4"
+          >
             View all projects
             <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
               arrow_forward
