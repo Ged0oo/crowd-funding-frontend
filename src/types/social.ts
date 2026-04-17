@@ -1,35 +1,47 @@
+import type { User } from "./auth"
+
 export interface Donation {
   id: number
-  amount: number
+  amount: string
   project: number
   project_title?: string
+  funded_pct?: number
   created_at: string
 }
 
 export interface Comment {
   id: number
   content: string
-  user: number
-  project: number
+  user: Pick<User, 'id' | 'first_name' | 'last_name'>
+  parent: number | null
+  replies: Comment[]
   created_at: string
 }
 
-export interface Reply {
-  id: number
-  content: string
-  user: number
-  comment: number
-  created_at: string
+export interface Reply extends Omit<Comment, 'replies'> {
+  parent: number
 }
 
 export interface Rating {
-  score: number
-  avg_rating: number
-  total_ratings: number
+  id?: number
+  project: number
+  value: number
+  new_project_average?: number
+  created_at: string
 }
 
 export interface Report {
   id: number
+  report_type: 'project' | 'comment'
   reason: string
+  project?: number
+  comment?: number
+  created_at: string
+}
+
+export interface DonationHistoryItem {
+  id: number
+  project_title: string
+  amount: string
   created_at: string
 }
