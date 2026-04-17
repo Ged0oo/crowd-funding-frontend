@@ -26,8 +26,6 @@ const ProjectDetailPage: React.FC = () => {
   const { data: project, isLoading, isError, error } = useProject(projectId);
   const user = useAuthStore((state) => state.user);
 
-  // ── Loading state ─────────────────────────
-
   if (isLoading) {
     return (
       <PageWrapper>
@@ -37,8 +35,6 @@ const ProjectDetailPage: React.FC = () => {
       </PageWrapper>
     );
   }
-
-  // ── Error state ───────────────────────────
 
   if (isError || !project) {
     return (
@@ -131,14 +127,10 @@ const ProjectDetailPage: React.FC = () => {
   return (
     <PageWrapper>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        {/* ════════════════════════════════════════ */}
-        {/* LEFT COLUMN — Project Content (2/3)     */}
-        {/* ════════════════════════════════════════ */}
         <div className="lg:col-span-2 space-y-8">
           {/* Image slider */}
           <ImageSlider images={images} />
 
-          {/* Title + status badges */}
           <div>
             <div className="mb-3 flex flex-wrap items-center gap-2">
               {project.category && (
@@ -157,7 +149,6 @@ const ProjectDetailPage: React.FC = () => {
             </h1>
           </div>
 
-          {/* Creator info */}
           <div className="flex items-center gap-3">
             {creator?.profile_picture ? (
               <img
@@ -183,7 +174,6 @@ const ProjectDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Description */}
           <div>
             <h2 className="mb-3 text-xl font-semibold text-gray-900">
               About This Project
@@ -202,8 +192,7 @@ const ProjectDetailPage: React.FC = () => {
                   <Link
                     key={tag.id}
                     to={`/search?tag=${tag.name}`}
-                    className="rounded-full bg-gray-100 px-3 py-1 text-sm 
-                               text-gray-700 transition hover:bg-gray-200"
+                    className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 transition hover:bg-gray-200"
                   >
                     #{tag.name}
                   </Link>
