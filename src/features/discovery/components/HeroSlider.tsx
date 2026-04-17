@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
-import type { ProjectCard } from "../../../types/projects";
+import type { ProjectCardProps } from "../../../types/projects";
 import "swiper/css";
 import "swiper/css/pagination";
 
 interface HeroSliderProps {
-  projects: ProjectCard[];
+  projects: ProjectCardProps[];
 }
 
 export default function HeroSlider({ projects }: HeroSliderProps) {

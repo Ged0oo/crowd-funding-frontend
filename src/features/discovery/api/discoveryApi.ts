@@ -1,5 +1,5 @@
 import type { HomepageData, PaginatedResult, SearchResult } from "../../../types/discovery";
-import type { ProjectCard } from "../../../types/projects";
+import type { ProjectCardProps } from "../../../types/projects";
 
 const BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
@@ -15,7 +15,7 @@ export async function searchProjects(query: string): Promise<SearchResult> {
   return res.json();
 }
 
-export async function getCategoryProjects(slug: string): Promise<PaginatedResult<ProjectCard>> {
+export async function getCategoryProjects(slug: string): Promise<PaginatedResult<ProjectCardProps>> {
   const res = await fetch(`${BASE}/categories/${slug}/projects/`);
   if (!res.ok) throw new Error("Failed to load category projects");
   return res.json();

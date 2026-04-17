@@ -3,7 +3,7 @@ import { useHomepage } from "../hooks/useHomepage";
 import HeroSlider from "../components/HeroSlider";
 import CategoryPills from "../components/CategoryPills";
 import ProjectGrid from "../components/ProjectGrid";
-import BentoGrid from "../components/BentoGrid";
+import FreshlyLaunchedGrid from "../components/FreshlyLaunchedGrid";
 import Spinner from "../../../shared/components/ui/Spinner";
 
 export default function HomePage() {
@@ -26,7 +26,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="-mx-6">
+    <div className="overflow-x-hidden -mx-6">
       <HeroSlider projects={data.top5_rated} />
 
       <CategoryPills categories={data.categories} />
@@ -53,7 +53,7 @@ export default function HomePage() {
       </section>
 
       {/* Freshly launched*/}
-      <section className="px-8 mb-24 bg-surface-container-low py-20 -mx-8">
+      <section className="px-8 mb-24 bg-surface-container-low py-20">
         <div className="max-w-[1440px] mx-auto px-8">
           <div className="mb-12">
             <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">
@@ -63,7 +63,7 @@ export default function HomePage() {
               Freshly Launched
             </h2>
           </div>
-          <BentoGrid projects={data.latest5} />
+          <FreshlyLaunchedGrid projects={data.latest5} />
         </div>
       </section>
     </div>
