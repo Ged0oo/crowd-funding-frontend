@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAuthStore } from "../../auth/stores/authStore"
 import { AlertTriangle } from "lucide-react"
 import { useReport } from "../hooks/useReport"
 import { toast } from "sonner"
@@ -23,7 +25,19 @@ interface ReportButtonProps {
 
 export default function ReportButton({ targetId, type }: ReportButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
+  
   const { sendProjectReport, sendCommentReport, isReporting } = useReport()
+
+  const handleOpenModal = () => {
+    if (!user) {
+      toast.info(`Please login to report this ${type}`)
+      navigate("/authenticate")
+      return
+    }
+    setIsOpen(true)
+  }
 
   const handleReport = async (reason: string) => {
     try {
@@ -43,7 +57,7 @@ export default function ReportButton({ targetId, type }: ReportButtonProps) {
     <>
       <Button
         variant="ghost"
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpenModal}
         className="!gap-2 !px-3 !py-1.5 !text-xs text-secondary hover:!text-error uppercase tracking-wider"
       >
         <AlertTriangle size={14} />
