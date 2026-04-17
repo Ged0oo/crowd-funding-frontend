@@ -16,12 +16,6 @@ import DonateWidget from "../../social/components/DonateWidget";
 import StarRating from "../../social/components/StarRating";
 import ReportButton from "../../social/components/ReportButton";
 
-import DonationProgress from "../../social/components/DonationProgress";
-import DonateWidget from "../../social/components/DonateWidget";
-import StarRating from "../../social/components/StarRating";
-import ReportButton from "../../social/components/ReportButton";
-import CommentThread from "../../social/components/CommentThread";
-
 const ProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const projectId = Number(id);
@@ -210,8 +204,7 @@ const ProjectDetailPage: React.FC = () => {
           <section className="border-t border-gray-200 pt-6">
             <StarRating
               projectId={project.id}
-              avgRating={project.avg_rating}
-              ratingCount={project.rating_count}
+              initialRating={project.avg_rating}
             />
           </section>
 
@@ -244,12 +237,7 @@ const ProjectDetailPage: React.FC = () => {
             {/* ═══════════════════════════════════ */}
             {/* DONATE WIDGET                       */}
             {/* ═══════════════════════════════════ */}
-            {!project.is_cancelled && (
-              <DonateWidget
-                projectId={project.id}
-                isRunning={project.is_running}
-              />
-            )}
+            {!project.is_cancelled && <DonateWidget projectId={project.id} />}
 
             {/* Campaign dates */}
             <CampaignDatesCard
@@ -264,7 +252,7 @@ const ProjectDetailPage: React.FC = () => {
             {/* REPORT BUTTON                       */}
             {/* ═══════════════════════════════════ */}
             {isAuthenticated && !isOwner && (
-              <ReportButton targetType="project" targetId={project.id} />
+              <ReportButton type="project" targetId={project.id} />
             )}
 
             {/* Cancel button — owner only, funded < 25% */}
