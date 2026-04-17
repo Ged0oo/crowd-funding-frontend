@@ -11,8 +11,8 @@ export const useDeleteAccount = () => {
         mutationFn: () => deleteAccountApi(),
         onSuccess: () => {
             console.log("Account successfully deleted (soft-delete).");
-            logout(); // Clear all state completely since account is gone
-            navigate("/"); // Boot out of the dashboard
+            logout();
+            navigate("/");
         },
         onError: (error) => {
             console.error("Failed to delete account", error);
