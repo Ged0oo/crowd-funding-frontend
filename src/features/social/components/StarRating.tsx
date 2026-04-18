@@ -7,16 +7,19 @@ import { toast } from "sonner";
 
 interface StarRatingProps {
   projectId: number;
+  projectOwnerId: number;
   initialRating?: number;
 }
 
 export default function StarRating({
   projectId,
+  projectOwnerId,
   initialRating = 0,
 }: StarRatingProps) {
   const [hover, setHover] = useState(0);
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const isOwner = user ? Number(user.id) === projectOwnerId : false;
 
   const { mutateAsync: rate, isPending } = useRating(projectId);
 
@@ -24,6 +27,10 @@ export default function StarRating({
     if (!user) {
       toast.info("Please login to rate this project");
       navigate("/authenticate");
+      return;
+    }
+
+    if (isOwner) {
       return;
     }
 
@@ -43,8 +50,8 @@ export default function StarRating({
             key={star}
             type="button"
             disabled={isPending}
-            onMouseEnter={() => setHover(star)}
-            onMouseLeave={() => setHover(0)}
+            onMouseEnter={() => !isOwner && setHover(star)}
+            onMouseLeave={() => !isOwner && setHover(0)}
             onClick={() => handleRate(star)}
             className="relative transition-all active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed group"
           >
@@ -54,7 +61,7 @@ export default function StarRating({
                 star <= (hover || initialRating)
                   ? "fill-primary text-primary"
                   : "text-outline-variant fill-transparent"
-              } ${!isPending && "group-hover:scale-110"}`}
+              } ${!isPending && !isOwner && "group-hover:scale-110"}`}
             />
           </button>
         ))}

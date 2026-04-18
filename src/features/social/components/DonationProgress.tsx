@@ -1,7 +1,4 @@
 interface DonationProgressProps {
-  current?: number | string | null;
-  target?: number | string | null;
-  percentage?: number | string | null;
   currentAmount?: number | string | null;
   totalTarget?: number | string | null;
   fundedPct?: number | string | null;
@@ -13,17 +10,13 @@ const toSafeNumber = (value: unknown): number => {
 };
 
 export default function DonationProgress({
-  current,
-  target,
-  percentage,
   currentAmount,
   totalTarget,
   fundedPct,
 }: DonationProgressProps) {
-  // Support both legacy and current prop names.
-  const safeCurrent = toSafeNumber(current ?? currentAmount);
-  const safeTarget = toSafeNumber(target ?? totalTarget);
-  const safePercentage = toSafeNumber(percentage ?? fundedPct);
+  const safeCurrent = toSafeNumber(currentAmount);
+  const safeTarget = toSafeNumber(totalTarget);
+  const safePercentage = toSafeNumber(fundedPct);
   const displayPct = Math.min(Math.max(safePercentage, 0), 100);
 
   return (
