@@ -5,8 +5,8 @@ import { type RegisterPayload } from '../../../types/auth';
 export const useRegister = () => {
     return useMutation({
         mutationFn: (data: RegisterPayload) => registerUser(data),
-        onSuccess: (response) => {
-            console.log("Registered successfully ", response)
+        onSuccess: () => {
+            // console.log("Registered successfully ", response)
         },
         onError: (error) => {
             console.error("Registeration Fail", error)

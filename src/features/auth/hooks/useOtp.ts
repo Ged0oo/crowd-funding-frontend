@@ -8,7 +8,7 @@ export const useOtp = () => {
     return useMutation({
         mutationFn: (data: OtpPayload) => verfiyOtp(data),
         onSuccess: async (response) => {
-            console.log("otp verified", response);
+            // console.log("otp verified", response);
             const {access, refresh} = response.data.Tokens;
             if (refresh && access)
             {

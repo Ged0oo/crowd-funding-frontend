@@ -9,7 +9,7 @@ export const useLogin = () => {
         mutationFn: (data: LoginPayload) => loginUser(data),
 
         onSuccess: async (response) => {
-            console.log('logged in successfully');
+            // console.log('logged in successfully');
             const {access, refresh} = response.data.Tokens;
             if (access && refresh) {
                 useAuthStore.getState().setAccessToken(access);

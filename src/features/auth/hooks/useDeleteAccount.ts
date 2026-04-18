@@ -10,7 +10,7 @@ export const useDeleteAccount = () => {
     return useMutation({
         mutationFn: () => deleteAccountApi(),
         onSuccess: () => {
-            console.log("Account successfully deleted (soft-delete).");
+            // console.log("Account successfully deleted (soft-delete).");
             logout();
             navigate("/");
         },

@@ -42,9 +42,9 @@ const UserProjectList = () => {
           </div>
           <h3 className="text-xl font-bold font-headline mb-2 text-on-surface">No projects yet!</h3>
           <p className="text-secondary max-w-md mb-6">You haven't launched any crowdfunding campaigns. Be the change and start your first project today.</p>
-          <button className="px-6 py-3 bg-primary text-on-primary font-bold rounded-xl shadow-md hover:shadow-lg transition-transform active:scale-95">
+          <Link to="/projects/create" className="px-6 py-3 bg-primary text-on-primary font-bold rounded-xl shadow-md hover:shadow-lg transition-transform active:scale-95">
             Create Project
-          </button>
+          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">

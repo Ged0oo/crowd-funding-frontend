@@ -6,8 +6,8 @@ export const useUpdateProfile = () => {
     
     return useMutation({
         mutationFn: (data: any) => updateProfileApi(data),
-        onSuccess: (response) => {
-            console.log("Profile updated successfully!");
+        onSuccess: () => {
+            // console.log("Profile updated successfully!");
             // Automatically refetch the profile data so the UI updates instantly
             queryClient.invalidateQueries({ queryKey: ['myProfile'] });
         },
