@@ -7,21 +7,20 @@ import { toast } from "sonner";
 
 interface StarRatingProps {
   projectId: number;
-  projectOwnerId: string;
+  isOwner: boolean;
   averageRating: number;
   userRating: number | null;
 }
 
 export default function StarRating({
   projectId,
-  projectOwnerId,
+  isOwner,
   averageRating,
   userRating,
 }: StarRatingProps) {
   const [hover, setHover] = useState(0);
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
-  const isOwner = user ? user.id === projectOwnerId : false;
 
   const { mutateAsync: rate, isPending } = useRating(projectId);
 
