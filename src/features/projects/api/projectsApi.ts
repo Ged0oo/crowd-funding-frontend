@@ -1,0 +1,345 @@
+import axios from "../../../services/axios";
+
+import type {
+    Project,
+    ProjectFormData,
+    ProjectListParams,
+    ProjectListResponse,
+    SimilarProjectResponse,
+    TagAutoCompleteResponse,
+    Category,
+    CancelResponse,
+    ImageUploadResponse
+} from "../../../types/projects";
+
+type RawProject = Partial<Project> & {
+    total_target?: number | string | null;
+    current_amount?: number | string | null;
+    current_donations?: number | string | null;
+    user_rating?: number | string | null;
+    avg_rating?: number | string | null;
+    average_rating?: number | string | null;
+    rating_count?: number | string | null;
+    total_ratings?: number | string | null;
+    funded_pct?: number | string | null;
+    funded_percentage?: number | string | null;
+    creator?: Project["creator"] | null;
+    owner?: {
+        id?: string | number;
+        first_name?: string;
+        last_name?: string;
+        email?: string;
+        profile_picture?: string | null;
+    } | null;
+    images?: Project["images"] | null;
+    media?: Array<{
+        id?: number;
+        image?: string;
+        created_at?: string;
+        is_cover?: boolean;
+        order?: number;
+    }> | null;
+    cover_image?: string | null;
+    start_date?: string;
+    end_date?: string;
+    start_time?: string;
+    end_time?: string;
+    status?: string;
+    tags?: Array<{ id?: number | string; name?: string } | string> | null;
+};
+
+const toNumber = (value: unknown): number => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const normalizeStatus = (status: unknown): Project["status"] => {
+    if (status === "cancelled") return "cancelled";
+    if (status === "completed") return "completed";
+    return "active";
+};
+
+const resolveMediaUrl = (url: string | null | undefined): string => {
+    if (!url) return "";
+    if (/^https?:\/\//i.test(url)) return url;
+
+    const base = import.meta.env.VITE_API_BASE_URL as string | undefined;
+    if (!base) return url;
+
+    const apiOrigin = new URL(base).origin;
+    return `${apiOrigin}${url.startsWith("/") ? "" : "/"}${url}`;
+};
+
+const parseProjectIdFromLocation = (location: string | null | undefined): number => {
+    if (!location) return 0;
+    const match = location.match(/\/projects\/(\d+)\/?$/i);
+    return match ? toNumber(match[1]) : 0;
+};
+
+const normalizeTags = (rawTags: unknown): Project["tags"] => {
+    if (!Array.isArray(rawTags)) return [];
+
+    return rawTags
+        .map((tag, index) => {
+            if (typeof tag === "string") {
+                const name = tag.trim();
+                if (!name) return null;
+                return { id: index + 1, name };
+            }
+
+            const name = typeof tag?.name === "string" ? tag.name.trim() : "";
+            if (!name) return null;
+            return {
+                id: toNumber(tag.id) || index + 1,
+                name,
+            };
+        })
+        .filter((tag): tag is Project["tags"][number] => Boolean(tag));
+};
+
+const normalizeProject = (raw: RawProject): Project => {
+    const totalTarget = toNumber(raw.total_target);
+    const currentAmount = raw.current_donations !== undefined && raw.current_donations !== null
+        ? toNumber(raw.current_donations)
+        : toNumber(raw.current_amount);
+    const fundedPct = raw.funded_percentage !== undefined && raw.funded_percentage !== null
+        ? toNumber(raw.funded_percentage)
+        : raw.funded_pct !== undefined && raw.funded_pct !== null
+            ? toNumber(raw.funded_pct)
+            : totalTarget > 0
+                ? (currentAmount / totalTarget) * 100
+                : 0;
+    const userRating = raw.user_rating !== undefined && raw.user_rating !== null 
+        ? toNumber(raw.user_rating) 
+        : null;
+    const avgRating = raw.average_rating !== undefined && raw.average_rating !== null
+        ? toNumber(raw.average_rating)
+        : toNumber(raw.avg_rating);
+    const ratingCount = raw.total_ratings !== undefined && raw.total_ratings !== null
+        ? toNumber(raw.total_ratings)
+        : toNumber(raw.rating_count);
+
+    const creator = raw.creator ?? raw.owner;
+    const media = Array.isArray(raw.media)
+        ? [...raw.media].sort((a, b) => {
+            if (Boolean(a.is_cover) !== Boolean(b.is_cover)) {
+                return a.is_cover ? -1 : 1;
+            }
+            const orderA = toNumber(a.order);
+            const orderB = toNumber(b.order);
+            if (orderA !== orderB) return orderA - orderB;
+            return toNumber(a.id) - toNumber(b.id);
+        })
+        : [];
+    const imagesFromRaw = Array.isArray(raw.images)
+        ? raw.images.map((item) => ({
+            ...item,
+            image: resolveMediaUrl(item.image),
+        }))
+        : [];
+    const imagesFromMedia = media.map((item) => ({
+        id: toNumber(item.id),
+        image: resolveMediaUrl(item.image),
+        created_at: item.created_at ?? raw.created_at ?? new Date().toISOString(),
+    }));
+    const coverImage = resolveMediaUrl(raw.cover_image);
+    const coverAsImage = coverImage
+        ? [{
+            id: 0,
+            image: coverImage,
+            created_at: raw.created_at ?? new Date().toISOString(),
+        }]
+        : [];
+    const images = imagesFromRaw.length > 0
+        ? imagesFromRaw
+        : imagesFromMedia.length > 0
+            ? imagesFromMedia
+            : coverAsImage;
+
+    const category = raw.category ?? {
+        id: 0,
+        name: "Uncategorized",
+        slug: "uncategorized",
+    };
+
+    return {
+        id: toNumber(raw.id),
+        title: raw.title ?? "Untitled Project",
+        details: raw.details ?? "",
+        total_target: totalTarget,
+        current_amount: currentAmount,
+        funded_pct: fundedPct,
+        avg_rating: avgRating,
+        user_rating: userRating,
+        rating_count: ratingCount,
+        creator: {
+            id: creator?.id as Project["creator"]["id"],
+            first_name: creator?.first_name ?? "Unknown",
+            last_name: creator?.last_name ?? "Creator",
+            email: creator?.email ?? "",
+            profile_picture: creator?.profile_picture ?? null,
+        },
+        category,
+        tags: normalizeTags(raw.tags),
+        images,
+        start_date: raw.start_date ?? raw.start_time ?? "",
+        end_date: raw.end_date ?? raw.end_time ?? "",
+        created_at: raw.created_at ?? new Date().toISOString(),
+        updated_at: raw.updated_at ?? raw.created_at ?? new Date().toISOString(),
+        status: normalizeStatus(raw.status),
+        is_featured: Boolean(raw.is_featured),
+        is_cancelled: Boolean(raw.is_cancelled),
+        is_running: Boolean(raw.is_running),
+    };
+};
+
+export const getProjects = async (
+    params?: ProjectListParams
+): Promise<ProjectListResponse> => {
+    const { data } = await axios.get<{ count?: number; next?: string | null; previous?: string | null; results?: RawProject[] }>("/projects/", {
+        params,
+    });
+    return {
+        count: data.count ?? 0,
+        next: data.next ?? null,
+        previous: data.previous ?? null,
+        results: Array.isArray(data.results) ? data.results.map(normalizeProject) : [],
+    };
+};
+
+export const getProject = async (id: number): Promise<Project> => {
+    const { data } = await axios.get<RawProject>(`/projects/${id}/`);
+    return normalizeProject(data);
+};
+
+export const createProject = async (
+    payload: ProjectFormData
+): Promise<Project> => {
+    const toApiDateTime = (date: string, timeOrDateTime?: string): string | undefined => {
+        if (!timeOrDateTime) return undefined;
+        if (timeOrDateTime.includes("T")) return timeOrDateTime;
+        return `${date}T${timeOrDateTime}:00`;
+    };
+
+    const resolvedTagIds = (await Promise.all(
+        (payload.tags ?? []).map(async (name) => {
+            const cleaned = name.trim().toLowerCase();
+            if (!cleaned) return undefined;
+
+            try {
+                const result = await searchTags(cleaned);
+                const exact = result.results.find(
+                    (tag) => tag.name.toLowerCase() === cleaned,
+                );
+                return exact?.id;
+            } catch {
+                return undefined;
+            }
+        }),
+    )).filter((id): id is number => typeof id === "number" && id > 0);
+
+    const mergedTagIds = Array.from(new Set([...(payload.tag_ids ?? []), ...resolvedTagIds]));
+
+    const requestPayload = {
+        ...payload,
+        category: payload.category_id,
+        start_time: toApiDateTime(payload.start_date, payload.start_time),
+        end_time: toApiDateTime(payload.end_date, payload.end_time),
+        tag_ids: mergedTagIds.length > 0 ? mergedTagIds : undefined,
+    };
+
+    const response = await axios.post<RawProject>("/projects/", requestPayload);
+    const normalized = normalizeProject(response.data);
+
+    if (normalized.id > 0) {
+        return normalized;
+    }
+
+    const headers = response.headers as Record<string, string | undefined>;
+    const projectIdFromHeaders = parseProjectIdFromLocation(
+        headers.location ?? headers["content-location"],
+    );
+
+    if (projectIdFromHeaders > 0) {
+        return getProject(projectIdFromHeaders);
+    }
+
+    const myProjects = await getProjects({ creator: "me" });
+    const exactMatch = myProjects.results.find((project) => {
+        const sameTitle = project.title === payload.title;
+        const sameTarget = toNumber(project.total_target) === toNumber(payload.total_target);
+        const sameStartDay = project.start_date.startsWith(payload.start_date);
+        const sameEndDay = project.end_date.startsWith(payload.end_date);
+        return sameTitle && sameTarget && sameStartDay && sameEndDay;
+    });
+
+    if (exactMatch?.id && exactMatch.id > 0) {
+        return exactMatch;
+    }
+
+    const fallbackByTitle = myProjects.results.find((project) => project.title === payload.title);
+    if (fallbackByTitle?.id && fallbackByTitle.id > 0) {
+        return fallbackByTitle;
+    }
+
+    throw new Error("Project was created, but API did not return its id. Please refresh and try uploading images again.");
+};
+
+export const updateProject = async (
+    id: number,
+    payload: Partial<ProjectFormData>
+): Promise<Project> => {
+    const { data } = await axios.patch<RawProject>(`/projects/${id}/`, payload);
+    return normalizeProject(data);
+};
+
+export const deleteProject = async (id: number): Promise<void> => {
+    await axios.delete(`/projects/${id}/`);
+};
+
+export const cancelProject = async (id: number): Promise<CancelResponse> => {
+    const { data } = await axios.post(`/projects/${id}/cancel/`);
+    return data;
+}
+
+export const getSimilarProjects = async (
+    id: number
+): Promise<SimilarProjectResponse> => {
+    const { data } = await axios.get<{ results?: RawProject[] }>(`/projects/${id}/similar/`);
+    return {
+        results: Array.isArray(data.results) ? data.results.map(normalizeProject) : [],
+    };
+};
+
+export const uploadProjectImages = async (
+    projectId: number,
+    images: File[],
+    onProgress?: (percent: number) => void
+): Promise<ImageUploadResponse> => {
+    const formData = new FormData();
+    images.forEach((image) => formData.append("images", image));
+    const { data } = await axios.post<ImageUploadResponse>(`/projects/${projectId}/images/`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+            if (onProgress && progressEvent.total) {
+                const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                onProgress(percent);
+            }
+        }
+    });
+    return data;
+};
+
+export const searchTags = async (query: string): Promise<TagAutoCompleteResponse> => {
+    const { data } = await axios.get<TagAutoCompleteResponse>("/tags/autocomplete/", {
+        params: { q: query },
+    });
+    return data;
+};
+
+export const getCategories = async (): Promise<Category[]> => {
+    const { data } = await axios.get<Category[]>("/projects/categories/");
+    return data;
+};
