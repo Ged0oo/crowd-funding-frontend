@@ -8,7 +8,7 @@ export const useGoogleAuth = () => {
     return useMutation({
         mutationFn: (token: GoogleAuthPayload) => verfiyGoogleAuth(token),
         onSuccess: async (response) => {
-            console.log('successful google login. Payload is:', response.data);
+            // console.log('successful google login. Payload is:', response.data);
             
             // Django might return `access` or `access_token` depending on jwt serialization config
             const access = response.data.access || response.data.access_token || response.data.key;

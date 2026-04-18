@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '../../../shared/components/layout/Navbar';
 import { useMyProfile } from '../hooks/useMyProfile';
 import { useUpdateProfile } from '../hooks/useUpdateProfile';
@@ -46,19 +46,43 @@ const MyProfilePage = () => {
   const { data: profileResponse, isPending, isError } = useMyProfile();
   const { mutateAsync: updateProfile, isPending: isUpdating } = useUpdateProfile();
   const { mutate: deleteAccount, isPending: isDeleting } = useDeleteAccount();
+  const [submitError, setSubmitError] = useState<string | null>(null);
   
   // The backend might return { status: "success", data: { ...userfields } }
   const user = profileResponse?.data?.data || profileResponse?.data;
   
-  const { register, handleSubmit } = useForm({
-    values: user // Auto-populate form when data arrives
+  const { register, handleSubmit, setError, formState: { errors }, reset } = useForm({
+    defaultValues: user
   });
+
+  useEffect(() => {
+    if (user) {
+      reset(user);
+    }
+  }, [reset, user]);
 
   const onSubmit = async (data: any) => {
     try {
+      setSubmitError(null);
       await updateProfile(data);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Submission failed", error);
+      const serverErrors = (error as any)?.response?.data?.error_message;
+
+      if (serverErrors && typeof serverErrors === 'object') {
+        Object.entries(serverErrors).forEach(([field, messages]) => {
+          const message = Array.isArray(messages) ? messages.join(' ') : String(messages);
+          setError(field as any, { type: 'server', message });
+        });
+        setSubmitError('Please fix the validation errors and try again.');
+        return;
+      }
+
+      setSubmitError(
+        (error as any)?.response?.data?.message ||
+        (error as any)?.message ||
+        'Unable to update profile. Please try again.'
+      );
     }
   };
 
@@ -156,7 +180,12 @@ const MyProfilePage = () => {
                 </div>
                 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  
+                  {submitError && (
+                    <div className="rounded-xl border border-error-container/30 bg-error-container/10 px-4 py-3 text-error">
+                      {submitError}
+                    </div>
+                  )}
+
                   {/* 1st row */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -191,10 +220,18 @@ const MyProfilePage = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-bold font-headline text-on-surface-variant ml-1">Phone Number</label>
                       <input 
-                        {...register('phone_number')}
+                        {...register('phone_number', {
+                          pattern: {
+                            value: /^01[0125]\d{8}$/,
+                            message: 'Enter a valid Egyptian phone number, e.g. 01012345678.',
+                          },
+                        })}
                         className="w-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary/10 rounded-xl p-4 text-on-surface outline-variant outline-1 outline" 
                         type="tel" 
                       />
+                      {errors.phone_number && (
+                        <p className="mt-2 text-sm text-error">{errors.phone_number.message as string}</p>
+                      )}
                     </div>
                   </div>
 

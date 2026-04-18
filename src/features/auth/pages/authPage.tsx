@@ -17,7 +17,7 @@ const AuthPage = () => {
 
       authenticateWithDjango({ access_token: tokenResponse.access_token }, {
         onSuccess: () => {
-          navigate("/dashboard");
+          navigate("/");
         }
       });
     },

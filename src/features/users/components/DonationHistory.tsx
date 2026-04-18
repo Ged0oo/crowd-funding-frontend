@@ -52,8 +52,9 @@ const DonationHistory = () => {
               {donations.map((donation: any) => (
                 <tr key={donation.id} className="border-b border-outline-variant/10 hover:bg-surface-container-lowest/50 transition-colors">
                   <td className="py-4">
-                    <div className="font-bold text-on-surface text-sm line-clamp-1">{donation.project?.title || 'Unknown Project'}</div>
-                  </td>
+                    <div className="font-bold text-on-surface text-sm line-clamp-1">
+                      {donation.project_title || donation.project?.title || donation.project || 'Unknown Project'}
+                    </div>                  </td>
                   <td className="py-4 text-sm text-secondary">
                     {new Date(donation.created_at || donation.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
