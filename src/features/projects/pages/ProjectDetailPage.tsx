@@ -327,13 +327,12 @@ const CampaignDatesCard: React.FC<CampaignDatesCardProps> = ({
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-gray-200">
           <div
-            className={`h-full rounded-full transition-all ${
-              isCancelled
-                ? "bg-red-400"
-                : isRunning
-                  ? "bg-blue-500"
-                  : "bg-gray-400"
-            }`}
+            className={`h-full rounded-full transition-all ${isCancelled
+              ? "bg-red-400"
+              : isRunning
+                ? "bg-blue-500"
+                : "bg-gray-400"
+              }`}
             style={{ width: `${Math.min(timeProgressPct, 100)}%` }}
           />
         </div>
@@ -343,15 +342,14 @@ const CampaignDatesCard: React.FC<CampaignDatesCardProps> = ({
         <div className="flex justify-between">
           <span className="text-gray-500">Status</span>
           <span
-            className={`font-medium ${
-              isCancelled
-                ? "text-red-600"
-                : isRunning
-                  ? "text-green-600"
-                  : isUpcoming
-                    ? "text-amber-600"
-                    : "text-gray-600"
-            }`}
+            className={`font-medium ${isCancelled
+              ? "text-red-600"
+              : isRunning
+                ? "text-green-600"
+                : isUpcoming
+                  ? "text-amber-600"
+                  : "text-gray-600"
+              }`}
           >
             {isCancelled
               ? "Cancelled"
