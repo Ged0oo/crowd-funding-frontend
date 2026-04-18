@@ -218,7 +218,7 @@ const ProjectDetailPage: React.FC = () => {
           <section className="border-t border-gray-200 pt-6">
             <StarRating
               projectId={project.id}
-              projectOwnerId={String(project.creator.id)}
+              isOwner={isOwner}
               averageRating={project.avg_rating}
               userRating={project.user_rating}
             />
@@ -248,12 +248,12 @@ const ProjectDetailPage: React.FC = () => {
               currentAmount={project.current_amount}
               totalTarget={project.total_target}
               fundedPct={project.funded_pct}
-            />
+            />  
 
             {/* ═══════════════════════════════════ */}
             {/* DONATE WIDGET                       */}
             {/* ═══════════════════════════════════ */}
-            {!project.is_cancelled && project.creator.id !== user?.id && <DonateWidget projectId={project.id} />}
+            {!project.is_cancelled && !isOwner && <DonateWidget projectId={project.id} />}
 
             {/* Campaign dates */}
             <CampaignDatesCard
