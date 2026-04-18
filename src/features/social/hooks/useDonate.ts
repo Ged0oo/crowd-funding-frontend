@@ -8,7 +8,7 @@ export function useDonate(projectId: number) {
 
   const mutation = useMutation({
     mutationFn: (amount: number) => donateToProject(projectId, amount),
-    
+
     onMutate: async (newAmount) => {
       await queryClient.cancelQueries({ queryKey: ["project", projectId] })
       await queryClient.cancelQueries({ queryKey: ["user-donations"] })
@@ -38,7 +38,7 @@ export function useDonate(projectId: number) {
       return { prevProject, prevHistory }
     },
 
-    onError: (err, newAmount, context) => {
+    onError: (_err, _newAmount, context) => {
       if (context?.prevProject) {
         queryClient.setQueryData(["project", projectId], context.prevProject)
       }
