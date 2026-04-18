@@ -50,6 +50,7 @@ export interface Project {
     current_amount: number
     funded_pct: number
 
+    user_rating: number | null;
     avg_rating: number
     rating_count: number
 
