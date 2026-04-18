@@ -16,6 +16,7 @@ type RawProject = Partial<Project> & {
     total_target?: number | string | null;
     current_amount?: number | string | null;
     current_donations?: number | string | null;
+    user_rating?: number | string | null;
     avg_rating?: number | string | null;
     average_rating?: number | string | null;
     rating_count?: number | string | null;
@@ -108,6 +109,9 @@ const normalizeProject = (raw: RawProject): Project => {
             : totalTarget > 0
                 ? (currentAmount / totalTarget) * 100
                 : 0;
+    const userRating = raw.user_rating !== undefined && raw.user_rating !== null 
+        ? toNumber(raw.user_rating) 
+        : null;
     const avgRating = raw.average_rating !== undefined && raw.average_rating !== null
         ? toNumber(raw.average_rating)
         : toNumber(raw.avg_rating);
@@ -166,6 +170,7 @@ const normalizeProject = (raw: RawProject): Project => {
         current_amount: currentAmount,
         funded_pct: fundedPct,
         avg_rating: avgRating,
+        user_rating: userRating,
         rating_count: ratingCount,
         creator: {
             id: creator?.id as Project["creator"]["id"],
