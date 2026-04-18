@@ -71,11 +71,26 @@ const ProjectDetailPage: React.FC = () => {
   const category = project.category;
   const tags = Array.isArray(project.tags) ? project.tags : [];
   const images = Array.isArray(project.images) ? project.images : [];
+  const now = new Date();
+  const campaignStart = new Date(project.start_date);
+  const campaignEnd = new Date(project.end_date);
+  const isUpcoming = !project.is_cancelled && now < campaignStart;
+  const isEnded =
+    !project.is_cancelled && now >= campaignEnd && !project.is_running;
   const creatorFirstName = creator?.first_name ?? "Unknown";
   const creatorLastName = creator?.last_name ?? "Creator";
   const creatorInitials = `${creatorFirstName[0] ?? "U"}${creatorLastName[0] ?? "C"}`;
 
-  const isOwner = creator ? String(user?.id) === String(creator.id) : false;
+  const normalizedUserEmail = user?.email?.trim().toLowerCase();
+  const normalizedCreatorEmail = creator?.email?.trim().toLowerCase();
+  const isOwner = Boolean(
+    creator &&
+    user &&
+    (String(user.id) === String(creator.id) ||
+      (normalizedUserEmail && normalizedCreatorEmail
+        ? normalizedUserEmail === normalizedCreatorEmail
+        : false)),
+  );
   const isAuthenticated = !!user;
 
   return (
@@ -120,12 +135,11 @@ const ProjectDetailPage: React.FC = () => {
                 <Badge variant="primary">⭐ Featured</Badge>
               )}
               {project.is_cancelled && <Badge variant="error">Cancelled</Badge>}
+              {isUpcoming && <Badge variant="neutral">Upcoming</Badge>}
               {!project.is_cancelled && project.is_running && (
                 <Badge variant="success">Running</Badge>
               )}
-              {!project.is_cancelled && !project.is_running && (
-                <Badge variant="neutral">Ended</Badge>
-              )}
+              {isEnded && <Badge variant="neutral">Ended</Badge>}
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900">
@@ -284,6 +298,8 @@ const CampaignDatesCard: React.FC<CampaignDatesCardProps> = ({
   const start = new Date(startDate);
   const end = new Date(endDate);
   const now = new Date();
+  const isUpcoming = !isCancelled && now < start;
+  const isEnded = !isCancelled && now >= end && !isRunning;
 
   // Calculate days remaining
   const msPerDay = 1000 * 60 * 60 * 24;
@@ -330,16 +346,28 @@ const CampaignDatesCard: React.FC<CampaignDatesCardProps> = ({
                 ? "text-red-600"
                 : isRunning
                   ? "text-green-600"
-                  : "text-gray-600"
+                  : isUpcoming
+                    ? "text-amber-600"
+                    : "text-gray-600"
             }`}
           >
-            {isCancelled ? "Cancelled" : isRunning ? "Running" : "Ended"}
+            {isCancelled
+              ? "Cancelled"
+              : isRunning
+                ? "Running"
+                : isUpcoming
+                  ? "Upcoming"
+                  : isEnded
+                    ? "Ended"
+                    : "Active"}
           </span>
         </div>
 
-        {isRunning && (
+        {(isRunning || isUpcoming) && (
           <div className="flex justify-between">
-            <span className="text-gray-500">Days Left</span>
+            <span className="text-gray-500">
+              {isUpcoming ? "Starts In" : "Days Left"}
+            </span>
             <span className="font-medium text-gray-900">
               {daysRemaining} {daysRemaining === 1 ? "day" : "days"}
             </span>

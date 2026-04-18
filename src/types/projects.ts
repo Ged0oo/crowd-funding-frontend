@@ -16,7 +16,7 @@ export interface ProjectImage {
 }
 
 export interface ProjectCreator {
-    id: number;
+    id: string | number;
     first_name: string;
     last_name: string;
     email: string;
@@ -74,15 +74,19 @@ export interface ProjectFormData {
     title: string
     details: string
     category_id: number
+    category?: number
     total_target: number
     start_date: string
     end_date: string
+    start_time?: string
+    end_time?: string
     tag_ids?: number[]
     tags?: string[]
 }
 
 export interface ProjectListParams {
     page?: number
+    page_size?: number
     category?: string
     tag?: string
     status?: "active" | "completed"

@@ -153,6 +153,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     [images, onChange],
   );
 
+  const handleSetCover = useCallback(
+    (index: number) => {
+      if (index === 0) return;
+      const selected = images[index];
+      const remaining = images.filter((_, i) => i !== index);
+      onChange([selected, ...remaining]);
+    },
+    [images, onChange],
+  );
+
   return (
     <div className="space-y-4">
       {/* ── Drop zone ────────────────────────── */}
@@ -237,6 +247,21 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                   >
                     Cover
                   </span>
+                )}
+
+                {index > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSetCover(index);
+                    }}
+                    className="absolute left-1 top-1 rounded bg-white/90 px-1.5 py-0.5 
+                               text-[10px] font-medium text-gray-700 shadow hover:bg-white"
+                    title="Set as cover"
+                  >
+                    Set cover
+                  </button>
                 )}
 
                 {/* Progress overlay (during upload) */}
