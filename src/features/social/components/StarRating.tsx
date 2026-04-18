@@ -21,14 +21,6 @@ export default function StarRating({
   const [hover, setHover] = useState(0);
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
-<<<<<<< Updated upstream
-=======
-
-  console.log(user?.id)
-  console.log(projectOwnerId)
-  const isOwner = user ? Number(user.id) === projectOwnerId : false;
-  console.log(isOwner)
->>>>>>> Stashed changes
 
   const { mutateAsync: rate, isPending } = useRating(projectId);
 
@@ -67,8 +59,8 @@ export default function StarRating({
             <Star
               size={24}
               className={`transition-colors duration-200 ${star <= (hover || (userRating ?? 0))
-                  ? "fill-primary text-primary"
-                  : "text-outline-variant fill-transparent"
+                ? "fill-primary text-primary"
+                : "text-outline-variant fill-transparent"
                 } ${!isPending && !isOwner && "group-hover:scale-110"}`}
             />
           </button>
