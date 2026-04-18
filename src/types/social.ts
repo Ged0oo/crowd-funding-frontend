@@ -26,6 +26,7 @@ export interface Rating {
   id?: number
   project: number
   value: number
+  user_rating?: number;
   new_project_average?: number
   created_at: string
 }
