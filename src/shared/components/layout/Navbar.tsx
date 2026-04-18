@@ -14,6 +14,7 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const user = useAuthStore((state) => state.user);
   const accessToken = useAuthStore((state) => state.accessToken);
   const logout = useAuthStore((state) => state.logout);
@@ -33,14 +34,14 @@ export default function Navbar() {
     return url;
   };
 
-  const links = useMemo(
-    () => [
-      { to: "/", label: "Home" },
-      { to: "/categories", label: "Categories" },
-      { to: "/projects/create", label: "Start Project" },
-    ],
-    [],
-  );
+  // const links = useMemo(
+  //   () => [
+  //     { to: "/", label: "Home" },
+  //     { to: "/categories", label: "Categories" },
+  //     { to: "/projects/create", label: "Start Project" },
+  //   ],
+  //   [],
+  // );
   function handleSearch(e: { preventDefault(): void }) {
     e.preventDefault();
     const q = searchQuery.trim();
@@ -116,11 +117,11 @@ export default function Navbar() {
                   initials={
                     displayUser?.first_name
                       ? (
-                          displayUser.first_name.charAt(0) +
-                          (displayUser.last_name
-                            ? displayUser.last_name.charAt(0)
-                            : "")
-                        ).toUpperCase()
+                        displayUser.first_name.charAt(0) +
+                        (displayUser.last_name
+                          ? displayUser.last_name.charAt(0)
+                          : "")
+                      ).toUpperCase()
                       : displayUser?.username
                         ? displayUser.username.charAt(0).toUpperCase()
                         : "?"
