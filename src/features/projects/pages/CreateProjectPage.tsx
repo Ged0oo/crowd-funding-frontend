@@ -48,6 +48,8 @@ const CreateProjectPage: React.FC = () => {
       total_target: 0,
       start_date: "",
       end_date: "",
+      start_time: "",
+      end_time: "",
     },
     mode: "onBlur",
   });
@@ -85,9 +87,12 @@ const CreateProjectPage: React.FC = () => {
         title: formData.title,
         details: formData.details,
         category_id: formData.category_id,
+        category: formData.category_id,
         total_target: formData.total_target,
         start_date: formData.start_date,
         end_date: formData.end_date,
+        start_time: formData.start_time,
+        end_time: formData.end_time,
         tags,
       });
 
@@ -100,8 +105,11 @@ const CreateProjectPage: React.FC = () => {
             (percent) => setUploadProgress(percent),
           );
           setUploadProgress(100);
-        } catch {
-          console.error("Image upload partially failed");
+        } catch (uploadErr) {
+          console.error("Image upload failed", uploadErr);
+          setSubmitError(
+            "Project created, but image upload failed. You can upload images later from project editing.",
+          );
         }
       }
 
@@ -264,6 +272,21 @@ const CreateProjectPage: React.FC = () => {
                 />
               </div>
 
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input
+                  label="Start Time"
+                  type="time"
+                  {...register("start_time")}
+                  error={errors.start_time?.message}
+                />
+                <Input
+                  label="End Time"
+                  type="time"
+                  {...register("end_time")}
+                  error={errors.end_time?.message}
+                />
+              </div>
+
               <div className="flex justify-end pt-4 border-t border-gray-100">
                 <Button type="submit">Next: Upload Images →</Button>
               </div>
@@ -277,8 +300,8 @@ const CreateProjectPage: React.FC = () => {
                   Project Images
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  The first image will be used as the cover image on project
-                  cards.
+                  You can pick any image as cover from the cards below. The
+                  selected cover appears first.
                 </p>
               </div>
 
@@ -530,7 +553,7 @@ const CreateProjectPage: React.FC = () => {
                       Creating Project...
                     </span>
                   ) : (
-                    "🚀 Create Project"
+                    "Create Project"
                   )}
                 </Button>
               </div>

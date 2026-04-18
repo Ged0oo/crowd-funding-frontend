@@ -20,16 +20,20 @@ export const projectDetailsSchema = z
             .max(100_000_000, "Target cannot exceed 100,000,000 EGP"),
         start_date: z.string().min(1, "Start date is required"),
         end_date: z.string().min(1, "End date is required"),
+        start_time: z.string().min(1, "Start time is required"),
+        end_time: z.string().min(1, "End time is required"),
     })
     .refine(
         (data) => {
-            if (data.start_date && data.end_date) {
-                return new Date(data.end_date) > new Date(data.start_date);
+            if (data.start_date && data.end_date && data.start_time && data.end_time) {
+                const start = new Date(`${data.start_date}T${data.start_time}:00`);
+                const end = new Date(`${data.end_date}T${data.end_time}:00`);
+                return end > start;
             }
             return true;
         },
         {
-            message: "End date must be after start date",
+            message: "End date/time must be after start date/time",
             path: ["end_date"],
         }
     );

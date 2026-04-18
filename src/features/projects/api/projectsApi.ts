@@ -44,6 +44,7 @@ type RawProject = Partial<Project> & {
     start_time?: string;
     end_time?: string;
     status?: string;
+    tags?: Array<{ id?: number | string; name?: string } | string> | null;
 };
 
 const toNumber = (value: unknown): number => {
@@ -66,6 +67,33 @@ const resolveMediaUrl = (url: string | null | undefined): string => {
 
     const apiOrigin = new URL(base).origin;
     return `${apiOrigin}${url.startsWith("/") ? "" : "/"}${url}`;
+};
+
+const parseProjectIdFromLocation = (location: string | null | undefined): number => {
+    if (!location) return 0;
+    const match = location.match(/\/projects\/(\d+)\/?$/i);
+    return match ? toNumber(match[1]) : 0;
+};
+
+const normalizeTags = (rawTags: unknown): Project["tags"] => {
+    if (!Array.isArray(rawTags)) return [];
+
+    return rawTags
+        .map((tag, index) => {
+            if (typeof tag === "string") {
+                const name = tag.trim();
+                if (!name) return null;
+                return { id: index + 1, name };
+            }
+
+            const name = typeof tag?.name === "string" ? tag.name.trim() : "";
+            if (!name) return null;
+            return {
+                id: toNumber(tag.id) || index + 1,
+                name,
+            };
+        })
+        .filter((tag): tag is Project["tags"][number] => Boolean(tag));
 };
 
 const normalizeProject = (raw: RawProject): Project => {
@@ -147,7 +175,7 @@ const normalizeProject = (raw: RawProject): Project => {
             profile_picture: creator?.profile_picture ?? null,
         },
         category,
-        tags: Array.isArray(raw.tags) ? raw.tags : [],
+        tags: normalizeTags(raw.tags),
         images,
         start_date: raw.start_date ?? raw.start_time ?? "",
         end_date: raw.end_date ?? raw.end_time ?? "",
@@ -182,8 +210,74 @@ export const getProject = async (id: number): Promise<Project> => {
 export const createProject = async (
     payload: ProjectFormData
 ): Promise<Project> => {
-    const { data } = await axios.post<RawProject>("/projects/", payload);
-    return normalizeProject(data);
+    const toApiDateTime = (date: string, timeOrDateTime?: string): string | undefined => {
+        if (!timeOrDateTime) return undefined;
+        if (timeOrDateTime.includes("T")) return timeOrDateTime;
+        return `${date}T${timeOrDateTime}:00`;
+    };
+
+    const resolvedTagIds = (await Promise.all(
+        (payload.tags ?? []).map(async (name) => {
+            const cleaned = name.trim().toLowerCase();
+            if (!cleaned) return undefined;
+
+            try {
+                const result = await searchTags(cleaned);
+                const exact = result.results.find(
+                    (tag) => tag.name.toLowerCase() === cleaned,
+                );
+                return exact?.id;
+            } catch {
+                return undefined;
+            }
+        }),
+    )).filter((id): id is number => typeof id === "number" && id > 0);
+
+    const mergedTagIds = Array.from(new Set([...(payload.tag_ids ?? []), ...resolvedTagIds]));
+
+    const requestPayload = {
+        ...payload,
+        category: payload.category_id,
+        start_time: toApiDateTime(payload.start_date, payload.start_time),
+        end_time: toApiDateTime(payload.end_date, payload.end_time),
+        tag_ids: mergedTagIds.length > 0 ? mergedTagIds : undefined,
+    };
+
+    const response = await axios.post<RawProject>("/projects/", requestPayload);
+    const normalized = normalizeProject(response.data);
+
+    if (normalized.id > 0) {
+        return normalized;
+    }
+
+    const headers = response.headers as Record<string, string | undefined>;
+    const projectIdFromHeaders = parseProjectIdFromLocation(
+        headers.location ?? headers["content-location"],
+    );
+
+    if (projectIdFromHeaders > 0) {
+        return getProject(projectIdFromHeaders);
+    }
+
+    const myProjects = await getProjects({ creator: "me" });
+    const exactMatch = myProjects.results.find((project) => {
+        const sameTitle = project.title === payload.title;
+        const sameTarget = toNumber(project.total_target) === toNumber(payload.total_target);
+        const sameStartDay = project.start_date.startsWith(payload.start_date);
+        const sameEndDay = project.end_date.startsWith(payload.end_date);
+        return sameTitle && sameTarget && sameStartDay && sameEndDay;
+    });
+
+    if (exactMatch?.id && exactMatch.id > 0) {
+        return exactMatch;
+    }
+
+    const fallbackByTitle = myProjects.results.find((project) => project.title === payload.title);
+    if (fallbackByTitle?.id && fallbackByTitle.id > 0) {
+        return fallbackByTitle;
+    }
+
+    throw new Error("Project was created, but API did not return its id. Please refresh and try uploading images again.");
 };
 
 export const updateProject = async (
