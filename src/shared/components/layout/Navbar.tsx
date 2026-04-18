@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../app/store";
 import { logoutApi } from "../../../features/auth/api/authApi";
