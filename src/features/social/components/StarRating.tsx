@@ -8,13 +8,15 @@ import { toast } from "sonner";
 interface StarRatingProps {
   projectId: number;
   projectOwnerId: number;
-  initialRating?: number;
+  averageRating: number;
+  userRating: number | null;
 }
 
 export default function StarRating({
   projectId,
   projectOwnerId,
-  initialRating = 0,
+  averageRating,
+  userRating,
 }: StarRatingProps) {
   const [hover, setHover] = useState(0);
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ export default function StarRating({
           <button
             key={star}
             type="button"
-            disabled={isPending}
+            disabled={isPending || isOwner}
             onMouseEnter={() => !isOwner && setHover(star)}
             onMouseLeave={() => !isOwner && setHover(0)}
             onClick={() => handleRate(star)}
@@ -58,7 +60,7 @@ export default function StarRating({
             <Star
               size={24}
               className={`transition-colors duration-200 ${
-                star <= (hover || initialRating)
+                star <= (hover || (userRating ?? 0))
                   ? "fill-primary text-primary"
                   : "text-outline-variant fill-transparent"
               } ${!isPending && !isOwner && "group-hover:scale-110"}`}
@@ -66,12 +68,17 @@ export default function StarRating({
           </button>
         ))}
 
-        {initialRating > 0 && (
-          <span className="ml-2 font-bold text-on-surface font-headline">
-            {initialRating.toFixed(1)}
+        <div className="flex items-center gap-1 ml-2">
+          <span className="font-bold text-on-surface font-headline">
+            {averageRating.toFixed(1)}
           </span>
-        )}
+          <span className="text-sm text-outline">Average</span>
+        </div>
       </div>
+      
+      {userRating !== null && !isOwner && (
+        <p className="text-xs text-primary font-medium">You rated this {userRating} stars</p>
+      )}
     </div>
   );
 }

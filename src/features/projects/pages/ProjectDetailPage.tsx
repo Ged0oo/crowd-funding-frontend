@@ -218,8 +218,9 @@ const ProjectDetailPage: React.FC = () => {
           <section className="border-t border-gray-200 pt-6">
             <StarRating
               projectId={project.id}
-              projectOwnerId={project.creator.id}
-              initialRating={project.avg_rating}
+              projectOwnerId={Number(project.creator.id)}
+              averageRating={project.avg_rating}
+              userRating={project.user_rating}
             />
           </section>
 
