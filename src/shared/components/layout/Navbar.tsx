@@ -8,11 +8,12 @@ import SearchBar from "../../../features/discovery/components/SearchBar";
 
 const NAV_LINKS = [
   { to: "/", label: "Discover" },
-  { to: "/categories", label: "Featured" },
+  { to: "/categories", label: "Categories" },
   { to: "/projects/create", label: "Start Project" },
 ];
 
 export default function Navbar() {
+  const [searchQuery, setSearchQuery] = useState();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const user = useAuthStore((state) => state.user);
